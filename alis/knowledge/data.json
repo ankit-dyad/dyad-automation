@@ -1,0 +1,47 @@
+{
+  "product": "alis",
+  "status": "explored",
+  "application": "ALIS (Alis Core / Alis Custom — Dyad Tech Private Limited automation POC)",
+  "environments": [
+    { "name": "UAT", "baseUrlEnvVar": "ALIS_UAT_BASE_URL" }
+  ],
+  "activeBaseUrlEnvVar": "ALIS_UAT_BASE_URL",
+  "baseUrl": "https://alisuat.novatae.com/ALIS.BMS/APP/#/login",
+  "framework": "Angular SPA (hash-based routing, #/login)",
+  "appVersion": "4.1.12.121",
+  "appVersionDate": "2025-05-11",
+  "credentials": [
+    {
+      "username": "dyadqa",
+      "password": "Welcome@123456",
+      "note": "UAT-only test credentials, mirrored from pages/login.md. Not gitignored — see conventions.md's rule against committing credentials before this is pushed."
+    }
+  ],
+  "loginFlow": {
+    "path": "#/login",
+    "confirmed": true,
+    "steps": [
+      "Navigate to ALIS_UAT_BASE_URL#/login",
+      "Fill #txtUserName with ALIS_UAT_USERNAME",
+      "Fill #txtPassword with ALIS_UAT_PASSWORD",
+      "Click button[type=submit]:has-text(\"Log In\")"
+    ],
+    "postLogin": {
+      "landingRoute": "#/followup",
+      "popup": {
+        "present": true,
+        "selector": "getByRole('dialog')",
+        "closeButtonSelector": "getByRole('dialog').getByRole('button', { name: 'Close' })",
+        "note": "A startup message modal (<lib-startup-message>, tabs 'Visit Notes'/'Message') opens on every successful login in UAT. Confirmed 2026-09-10."
+      }
+    }
+  },
+  "primaryNavigation": [],
+  "openItems": [
+    "Validation/error message behavior for invalid credentials (selector + text) — not yet captured.",
+    "Exact accessible name/selector for the 'Open Resource Center' button.",
+    "Whether 'Forgot Password?' leads to a page worth documenting separately.",
+    "Whether the post-login startup message popup can ever be suppressed (e.g. a 'don't show again' setting) — not yet known."
+  ],
+  "lastVerified": "2026-09-10"
+}

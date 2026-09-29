@@ -1,0 +1,87 @@
+# Index of documented pages/journeys for Alis Core.
+# Populated/updated by /agents/explorer-agent.ts, or by hand — direct path
+# lookup only, no fuzzy search, no embeddings. Generator agent resolves
+# knowledge files through this file exclusively.
+#
+# Shape:
+# - page: policy-quote
+#   file: pages/policy-quote.md
+#   journeys: [new-business, renewal]
+#   last_verified: 2026-08-15
+#   app_version: 4.2
+- page: login
+  file: pages/login.md
+  journeys: [login]
+  last_verified: 2026-09-18
+  app_version: 4.1.21.5
+- page: payment-batch-list
+  file: pages/payment-batch-list.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: payment-batch-setup
+  file: pages/payment-batch-setup.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-18
+  app_version: 4.1.21.5
+- page: payment-upload
+  file: pages/payment-upload.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: check-register
+  file: pages/check-register.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-18
+  app_version: 4.1.21.5
+- page: batch-transaction-detail-popup
+  file: pages/batch-transaction-detail-popup.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-21
+  app_version: 4.1.21.5
+- page: invoice-application
+  file: pages/invoice-application.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: ach-eft-check
+  file: pages/ach-eft-check.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-21
+  app_version: 4.1.21.5
+- page: check-summary-popup
+  file: pages/check-summary-popup.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-21
+  app_version: 4.1.21.5
+- page: payment-upload-file-validation
+  file: pages/payment-upload-file-validation.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: print-check
+  file: pages/print-check.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-21
+  app_version: 4.1.21.5
+  status: blocked
+- page: remittance-advice
+  file: pages/remittance-advice.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-21
+  app_version: 4.1.21.5
+- page: agency-bank-setup
+  file: pages/agency-bank-setup.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: payment-tab-individual-records
+  file: pages/payment-tab-individual-records.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5
+- page: payment-batch-list-pdf-export
+  file: pages/payment-batch-list-pdf-export.md
+  journeys: [payment-upload-to-remittance]
+  last_verified: 2026-09-28
+  app_version: 4.1.21.5

@@ -1,0 +1,17 @@
+{
+  "tab": "Binding",
+  "coverage": "Commercial Package",
+  "cob": "Commercial Package",
+  "product": null,
+  "operation": null,
+  "filingState": "Connecticut",
+  "term": 12,
+  "proposedEffective": "08/26/2026",
+  "proposedExpiry": "08/26/2027",
+  "addMarketDetail": [
+    {
+      "marketCompany": "Hadron Specialty Insurance Company (M-RM0164-007)",
+      "riskCo": "Hadron Specialty Insurance Company (R4970-003)"
+    }
+  ]
+}

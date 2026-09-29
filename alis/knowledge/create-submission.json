@@ -1,0 +1,52 @@
+{
+  "applicantInformation": {
+    "agency": "(AGT51935) DYAD Test Agency (Advance, NC, 27006, Davie)",
+    "applicantType": "Corporation",
+    "fullName": "Jordan Brad",
+    "mailingAddress": "139 Southeast Main Street",
+    "mailingAddress2": "PO",
+    "cityStateZip": "Bethel, CT, 06801",
+    "physicalAddressSameAsMailing": true,
+    "insuredCode": null,
+    "insuredCodeNote": "Assigned by the app when the insured is created — not a fixed input value.",
+    "alternateDba": null,
+    "occupation": "JOB",
+    "employer": "YES",
+    "co": null,
+    "naics": null,
+    "dateOfBirth": "02/13/1991",
+    "email": "v.patel@dyadtech.com",
+    "phone": "(111)121-1212",
+    "ext": null,
+    "fax": null,
+    "identificationType": "EIN",
+    "einSsnValue": null,
+    "showEinSsn": false,
+    "hasSpouseOrCoApplicant": false,
+    "notes": null
+  },
+  "contactInformation": {
+    "sameAsMailingAddress": true,
+    "contactName": "Frimon",
+    "address1": "PO Box 98765",
+    "address2": null,
+    "cityStateZip": "Arlington, TX, 76016",
+    "email": null,
+    "phone": null,
+    "ext": null,
+    "fax": null
+  },
+  "accountInformation": {
+    "office": "Southwest",
+    "team": "Dallas TX Private Client Solutions",
+    "uwBroker": "Courtney Kerr",
+    "assistant": "Courtney Kerr",
+    "originatingUwBroker": "Courtney Kerr",
+    "secondaryUw": null,
+    "renewalQuoter": null,
+    "filingState": "Connecticut",
+    "term": 12,
+    "proposedEffective": "09/09/2026",
+    "proposedExpiry": "09/09/2027"
+  }
+}

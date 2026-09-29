@@ -1,0 +1,21 @@
+# Index of documented pages/journeys for Alis.
+# Populated/updated by /agents/explorer-agent.ts — direct path lookup only,
+# no fuzzy search, no embeddings. Generator agent resolves knowledge files
+# through this file exclusively.
+#
+# Shape:
+# - page: policy-quote
+#   file: pages/policy-quote.md
+#   journeys: [new-business, renewal]
+#   last_verified: 2026-08-15
+#   app_version: 4.2
+- page: login
+  file: pages/login.md
+  journeys: [login]
+  last_verified: 2026-09-10
+  app_version: 4.1.12.121
+- page: header
+  file: pages/header.md
+  journeys: [login, header]
+  last_verified: 2026-09-10
+  app_version: 4.1.12.121

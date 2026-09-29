@@ -1,0 +1,63 @@
+# Knowledge Base — Client Record: "Overview" Page
+
+**Application:** Nexsure (R5 Insurance Agency) — `nexui` Vue.js SPA
+**Captured from:** Client record `Clients: Automation_001` (the same client used throughout the Manual Quote / Opportunity-Marketing-Binding / Policy Details companion documents)
+**URL at capture:** `https://jmiqaweb01.nexsure.com/nexui/#/entity_console/{orgId}/{clientId}/home` (hash-routed SPA; tab state persists in the URL, unlike the Opportunity record's tabs)
+**Captured on:** 2026-09-21
+
+This is the landing page of the Client record — a dashboard summarizing the client's policies, actions, alerts, and recent activity. It is one of several sibling documents covering the Client-level tab bar (Overview, Profile, Opportunities, Submissions, Policies, Claims, Accounting, Actions, Deliveries, Attachments, Phone Log); 
+
+> **Scope note — what was deliberately NOT exercised:** the **Activate / Deactivate** toggle (top right of the client header) was not touched — this looks like a real, likely consequential status change for the whole client record. **Manage Assignment** (Client Assignments panel) was opened only far enough to see it's a picker, not fully exercised. All three of the header's action buttons (New Action, New Delivery, Create Document) were opened to document their forms but **cancelled without saving/sending** — nothing was actually created.
+
+## 1. Client header (shared across all Client-level tabs)
+
+This header bar is visible above the tab strip on every Client-level page, not just Overview:
+
+- **Breadcrumb title:** "Clients" + a small client-type icon + the client name (**Automation_001**), linked.
+- **Address line** (with a location-pin icon): street, city/state/zip, country.
+- **Contact line:** a linked contact name (**Automation_001 Test**, with "(Goes by Automation_001)" suffix) with its own small icon, plus an email icon below it.
+- A row of key-value stats: **Created On** (date), **Client Since** (seen as "N/A"), **Portal Logins** (count), **Portal Accessed** (seen as "N/A"), **Effort Quotient** (a number with its own small info "ⓘ" tooltip icon), **Unpaid Invoices** (count), **Related Account** (count), **Account Balance** (currency).
+- Top-right: an **Activate / Deactivate** toggle switch (currently in the "Activate" position — on) — **not touched**, and three action buttons:
+  - **NEW ACTION** (lightning-bolt icon) — opens the same in-page **"New Action"** dynamic modal documented in the Opportunity-level KBs' "Add Action" flows, scoped to this Client. Fields: Topic\* (long alphabetical searchable dropdown, roughly 30–40 options from "Action Alert" through "Verifications" — includes odd/test-looking entries like "Test linkage 1/2/3" and "Release 2.1 Action Topic", confirming this is a QA sandbox's live configuration), Type\* (a second dropdown, **disabled/greyed until Topic is chosen** — a dependent field), Priority (dropdown, default "Normal"), Status (Open/Closed toggle, default Open), Due Date\* (date picker with calendar icon, defaulted to today), Due Time\* (time value + AM/PM dropdown + a separate IANA-style timezone dropdown, e.g. "(GMT-08:00) Pacific Time (US & Canada); Tijuana"), Premium (free numeric field), Description (single-line text), Memo (multi-line textarea). Right column: **Assignment** (two radio options — "current user" vs. the record's Account Executive — plus a Search box for assigning someone else), **Associations** (a tab set — Opportunities / Policies / Deliveries / Certificates — each with its own search box, for linking the new Action to an existing record), **Attachments** (search box plus a drag-and-drop file-upload zone). Footer: an **"ADD ANOTHER"** checkbox (keeps the modal open to create a second Action after saving), a **Time Taken** field (defaults "00:00"), and **Save** / **Cancel** buttons. This is an in-page `.dynamicModal`, not a new tab/popup/iframe; it also has an expand/maximize icon next to its close "×".
+  - **NEW DELIVERY** (envelope icon) — opens an in-page **"{Client} - New Delivery"** modal, essentially a full email/communication composer: **Delivery Type** dropdown with **5 options: Email, Fax, SMS, Voice, ESignature** (default "Email"); **Delivery Title**; **Frequently Used Templates** dropdown + an **"All Templates"** button; on the left, **From Name / Email** (pre-filled with the logged-in user's name and address, e.g. "dyad.automation@dyadtech.com"), **To Name\* / Email\*** (empty, required, with an address-book-style icon), **CC / BCC** (same icon); on the right, **Subject\*** and a **Body\*** rich-text editor with an **HTML / Plain Text** radio toggle and a WYSIWYG toolbar (Bold, Italic, Underline, font-size "A⌄", align-left, align-right, numbered list, paragraph style, link, image, table, undo, redo, fullscreen, and an overflow "⋮" menu). Below: **Associations** (tabs **Policies / Opportunities**, each with a search box and a "Search/Browse" button) and **Attachment** (search box + drag-and-drop upload zone). Footer checkboxes: **Send Secure**, **Create Action**; buttons: **Send**, **Save Draft**, **Print**, **Cancel**.
+  - **CREATE DOCUMENT** (document icon) — opens a small in-page **"Create a Document From Template"** modal. In this test environment its body renders **completely empty** (no template list, no fields) — i.e. no document templates are currently configured for this agency/client, so the feature is present in the UI but has nothing to select. Only a close "×" is available.
+- Below the header, the **main tab bar**: **OVERVIEW, PROFILE, OPPORTUNITIES, SUBMISSIONS, POLICIES (N), CLAIMS, ACCOUNTING** — plus a **second tab row** that is always visible beneath the main bar regardless of which main tab is active: **ACTIONS, DELIVERIES, ATTACHMENTS, PHONE LOG**. (This matches the structure already noted in `Policy_Details_Knowledge_Base.md` §1 for the Policies section, confirming it's a client-record-wide pattern, not specific to Policies.)
+
+## 2. The Overview dashboard — panel layout
+
+The Overview tab itself is a **two-column dashboard of fixed panels** (unlike the Policy Detail page's Overview tab, there is no "Edit My Panels" customization control here — panels are static). Six panels, left column then right column, top to bottom:
+
+### 2.1 Key Indicators (left)
+Five large colored counters, each with a label beneath: **Past Due Actions** (red), **Open Actions** (green), **Policies Past Expiration** (red), **Open Binders** (green), **Open Claims** (red). Seen values in this test: 0 / 1 / 0 / 0 / 0. Purely a read-only summary — no controls.
+
+### 2.2 Client Alerts (right)
+Header reads **"Client Alerts (0)"** with a small info "ⓘ" tooltip icon. Empty panel in this test (no alerts configured) — no grid, no empty-state message, just blank space.
+
+### 2.3 Stick-e-Notes (left)
+Header with an info "ⓘ" icon and a **"+ New"** link (top right of the panel). Empty in this test — not exercised further (adding a note was not attempted, to avoid creating test data outside the documented scope).
+
+### 2.4 Account Activity (right)
+The richest panel on the page — effectively an embedded, filterable activity feed:
+- Row of filter toggles: **○ All**, **⚡ Actions**, **📎 Attachments**, **✉ Deliveries**, **📞 Phone Log** (radio-style; "All" selected by default).
+- **"Show Filters" / "Close Filters"** toggle link, which expands to reveal: a **Keyword** text box, a **Date Range** dropdown (**3 options: All Time [default], Year to Date, Last Two Years**), an **Apply Filter** button, a **Clear** button, and three small links along the same row — **Save**, **Recall** (greyed/disabled until a filter is saved), **Clear Memory** (also greyed) — implying filter presets can be saved and recalled per user.
+- A **Flat List / Group by Month** toggle switch (defaults to Flat List).
+- The grid itself: a header showing **"All (5)"** (count reflects the current filter), then rows with **Date/Time**, **"by {user}"**, a small type icon (e.g. an upload-arrow icon for "Outgoing Email", a lightning-bolt "＋" icon for "Action Created"), an **event-type label** (e.g. "Outgoing Email", "Action Created"), and a linked **description** (e.g. "QA0 Org 777 EMAIL SUBJ: Inforce...", "Marketing New Opportunity Policy", "Memo In force SA Failure (Verificat...)", "Memo In force SA Failure (Thank Y...)", "Marketing New policy."). These entries are the same underlying audit-trail events referenced elsewhere in the companion KBs (e.g. the stray Action and queued/cancelled Delivery from the "In Force" submission documented in `Opportunity_Marketing_Page_Knowledge_Base.md` §6.7 and `Policy_Details_Knowledge_Base.md` §6).
+- Top-right of the panel: a **"☰ VIEW T-LOG"** link — presumed to navigate to a fuller, dedicated activity-log view; not clicked (out of scope for this pass, and likely just a filtered/expanded version of this same data, consistent with the Policy Detail page's Overview-vs-Activity-tab duplication already noted in `Policy_Details_Knowledge_Base.md` §9).
+
+### 2.5 Active Policies (left)
+- Collapsible group header per Line of Business, e.g. **"▸ General Liability - Commercial (1)"** — the count is the number of active policies under that LOB. Expanding it (▸ → ▾) reveals a small grid: **POLICY #** (linked, e.g. "OPP-001394"), **TERM** (two stacked dates), **STATUS** (e.g. "In Force"), **LAST EVENT** (seen as "N/A"), **ON** (date), and a **BILLED PREM** column that was cut off at the right edge of the panel in this viewport (panel is a fixed narrow width; the value wasn't fully visible without widening the browser window — worth checking at a wider resolution if this field matters for automation).
+- Below the LOB group(s): an **"ACTIVE POLICY TOTALS"** summary row with **Total Premiums** and **Agency Commission**, each broken into **LAST 12 MONTHS** and **LIFETIME** columns (both $0.00 in this test — consistent with the $0.00 premium discrepancy already flagged in  §8, though this panel is a different report surface).
+
+### 2.6 Client Assignments (left, bottom)
+- A **"SERVICE AUTOMATION"** Off/On toggle (seen On) and a **"Manage Assignment"** button (top right of the panel) — not fully exercised; presumed to open an assignment-editing modal similar in shape to the Policy Assignments panel documented in  §5.3.
+- A grid: **PRIMARY** (✓ checkmark column), **NAME** (linked, with a small icon), **BRANCH**, **DEPARTMENT**, **UNIT**, **RESPONSIBILITY**, and a trash/delete icon per row. One row in this test: Primary ✓, "DyadQA 2.5 Automation", "2.5 branch", "Bond Department", "Auto test", "Account Executive" — the same assignment data seen on the Policy Detail page's Assignments tab.
+
+## 3. Summary checklist for automation design
+
+- The **client header's three action buttons (New Action / New Delivery / Create Document)** are present and behave identically across every Client-level tab, not just Overview — document them once and reuse rather than re-testing per tab.
+- **New Action**'s Type dropdown is **dependent on Topic** — it stays disabled until a Topic is chosen. Any automation filling this form must select Topic first or Type will remain unclickable.
+- **Create Document** renders an **empty modal** in this environment — there is no template to select, so this feature cannot be exercised end-to-end here; don't treat an empty body as a bug/error state without checking whether templates exist for the target agency.
+- Six dashboard panels, in a fixed (non-reorderable) two-column layout, distinguishing this Overview tab from the Policy Detail page's Overview tab (which *does* support "Edit My Panels" customization) — don't assume all "Overview" tabs in this app share the same customization capability.
+- The **Account Activity panel is a smaller, embedded version of the same activity feed** documented more fully at the policy level ( §5.7 Activity tab) — it shares the All/Actions/Attachments/Deliveries/Phone Log filter pattern and the Date Range (All Time/Year to Date/Last Two Years) filter option set. A "VIEW T-LOG" link presumably opens a fuller version; not yet documented.
+- The **Active Policies panel's BILLED PREM column was clipped** in this viewport — verify at a wider browser width before relying on that column being visible without horizontal scroll.
+- **Client Alerts and Stick-e-Notes were both empty** in this test client and rendered with no explicit empty-state text (unlike the three distinct empty-state styles already catalogued in  §9) — this looks like a fourth, blank-panel empty-state variant, worth confirming against a client that actually has alerts/notes.

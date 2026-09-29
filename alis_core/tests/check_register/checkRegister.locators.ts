@@ -1,0 +1,105 @@
+import type { Page } from '@playwright/test';
+
+/**
+ * Locator definitions for the Alis Core Accounting "Check Register" screen —
+ * sourced from the "## Selectors" table in
+ * alis_core/knowledge/pages/check-register.md. Nothing but locators belongs
+ * here; actions live in checkRegister.page.ts, assertions in
+ * checkRegister.test.ts.
+ *
+ * The "Check Register" and "Spoiled Checks" tab-panes are both kept mounted
+ * in the DOM at once (Bootstrap tabs, not conditionally rendered) and reuse
+ * the same element ids in each pane — confirmed via a strict-mode violation
+ * the first time this was automated (`#ddlClientType` resolved to 2
+ * elements). Every locator below is scoped under `#pills-cashlisting` (the
+ * Check Register pane's container, confirmed via its tab button's
+ * `data-bs-target`) to avoid matching the Spoiled Checks pane's copy.
+ */
+export class CheckRegisterLocators {
+  private readonly pane = this.page.locator('#pills-cashlisting');
+
+  constructor(private readonly page: Page) {}
+
+  get checkRegisterTab() {
+    return this.page.locator('#pills-cashlisting-tab');
+  }
+
+  get spoiledChecksTab() {
+    return this.page.locator('#pills-spoilcheck-tab');
+  }
+
+  get checkStatusDropdown() {
+    return this.pane.locator('#ddlCheckStatus');
+  }
+
+  get clientTypeMultiselect() {
+    return this.pane.locator('#ddlClientType');
+  }
+
+  get clientTypeMultiselectToggle() {
+    return this.pane.locator('#ddlClientType .dropdown-btn');
+  }
+
+  /** One checkbox inside an open ng-multiselect-dropdown panel, matched by its
+   * `aria-label` (which equals the option's exact display text). Its own
+   * label `<div>` visually covers it (custom checkbox styling), so it can be
+   * read (`isChecked()`) but not reliably clicked directly — see
+   * clientTypeOptionRow() for the clickable target. */
+  clientTypeOption(label: string) {
+    return this.pane.locator(`#ddlClientType input[aria-label="${label}"]`);
+  }
+
+  /** The `<li>` row wrapping a Client Type checkbox — click this (not the
+   * checkbox input itself) to toggle it; see conventions.md and
+   * check-register.md's Edge Cases for why. */
+  clientTypeOptionRow(label: string) {
+    return this.clientTypeOption(label).locator('xpath=ancestor::li[1]');
+  }
+
+  get searchByDropdown() {
+    return this.pane.locator('#search');
+  }
+
+  get searchValueField() {
+    return this.pane.locator('#txtBatch_Payee_Checkno');
+  }
+
+  get searchButton() {
+    return this.pane.locator('button[type=submit]:has-text("Search")');
+  }
+
+  get exportToExcelButton() {
+    return this.pane.locator('button:has-text("Excel")');
+  }
+
+  get approveButton() {
+    return this.pane.locator('#btnApprove');
+  }
+
+  get remittanceDownloadAsButton() {
+    return this.pane.locator('button:has-text("Remittance Download As")');
+  }
+
+  /** ag-Grid renders each data row twice — once in `.ag-center-cols-container`
+   * (the main scrollable columns) and once more in
+   * `.ag-pinned-right-cols-container` (the pinned action-icon column), both
+   * sharing the same `row-id` — confirmed via live DOM inspection after a
+   * `toHaveCount()` assertion unexpectedly returned double the real row
+   * count. Scoped to the center container only, so this reflects actual data
+   * rows. */
+  get gridRows() {
+    return this.pane.locator('.ag-center-cols-container .ag-row');
+  }
+
+  /** Batch No column cell, any row — `col-id="batch_no"` confirmed via live
+   * DOM inspection (ag-Grid's generated column id, not a guess). Scoped to
+   * the center container for the same reason as gridRows. */
+  get gridBatchNoCells() {
+    return this.pane.locator('.ag-center-cols-container [col-id="batch_no"]');
+  }
+
+  /** First grid row's Batch No cell. */
+  get firstRowBatchNo() {
+    return this.gridBatchNoCells.first();
+  }
+}

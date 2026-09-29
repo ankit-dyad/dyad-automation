@@ -1,0 +1,232 @@
+# Nexsure Automation KB
+
+Element-by-element reference for the Nexsure app (`nexui`), built for browser-automation scripts. Growing document — one section per screen/flow as it gets explored. No automation-framework code is included by request; each screen instead gets a plain selector table (accessible role/label + fallback CSS).
+
+**Last updated:** 2026-09-17 · **Environment:** jmiqaweb01 (QA) · **Frontend:** Vue.js SPA, hash-based routing (`#/...`), zero native `<form>` elements throughout, `<title>` stays `"Nexsure"` on every screen — don't rely on the title or full page navigation events for automation waits, watch DOM content or the URL hash instead. Pendo analytics/guides are active app-wide (elements with `id="pendo..."`, `_pendo_*` in `localStorage`, and a floating Resource Center badge) — automation may occasionally see a Pendo-injected overlay.
+
+---
+
+## Page: Sign-in
+
+| Fact | Value |
+|---|---|
+| Screen | Sign in to Nexsure |
+| Base path | `/nexui/` |
+| Native `<form>` tags | 0 (JS-handled submit) |
+
+### Overview
+
+The sign-in screen is a single card, left-aligned inside a full-viewport gradient background, with a large decorative "dyad" wordmark filling the right side of the card. There is no CAPTCHA, no SSO/social-login button, and no language selector. A short static disclaimer under the action buttons tells users to contact their own Nexsure administrator for login support, since Dyad (the reseller/host in this environment) does not manage credentials.
+
+### Visual layout
+
+```
+┌───────────────────────────────────────────┐
+│  Sign in to Nexsure                        │
+│                                             │
+│  USERNAME                                  │
+│  [_________________________]               │
+│                                             │
+│  PASSWORD                                  │
+│  [_________________________]               │
+│                                             │
+│  [x] Remember Me                           │
+│                                             │
+│  [ 🔒 Forgot Password ]  [ → Sign in ]      │
+│                                             │
+│         Change Password                    │
+│                                             │
+│   Please contact your company's            │
+│   Nexsure Administrators for Login Support.│
+│   Dyad cannot provide your Username or     │
+│   Password.                                │
+└───────────────────────────────────────────┘   (right side: large faded "dyad" wordmark, decorative only)
+
+Footer (page-level, below the card):
+  ☁ Download Attachment Manager     ☁ Download eServices
+```
+
+### Element inventory
+
+| # | Element | Type / role | Visible text | Required | Notes |
+|---|---|---|---|---|---|
+| 1 | Username field | textbox `input[type=text]` | label: `username` | Yes | No `id`/`name`/`placeholder`. Class `form-control form-control-sm`. Pre-fills from a prior "Remember Me" session (see Behavior). |
+| 2 | Password field | textbox `input[type=password]` | label: `password` | Yes | Same styling as username. Value is masked and does **not** persist across reloads. |
+| 3 | Remember Me | checkbox | `Remember Me` | No | Checkbox is nested directly inside its `<label>` (no `for`/`id` pairing needed). Checked state persists across page loads. |
+| 4 | Forgot Password | button | `Forgot Password` | — | Outlined style, lock icon (inline SVG). Not exercised — flow undocumented, see Open items. |
+| 5 | Sign in | button | `Sign in` | — | Filled/primary style, arrow icon (inline SVG). Triggers authentication via JS (no native form submit). |
+| 6 | Change Password | link `<a>` | `Change Password` | — | Href is a placeholder (`#`); behavior is JS-driven, not a real navigation. |
+| 7 | Download Attachment Manager | link, footer | `Download Attachment Manager` | — | External link (points at the NexBox installer host). Has a small download-cloud icon. |
+| 8 | Download eServices | link, footer | `Download eServices` | — | External link (points at the NexEServices installer host). Same icon style as #7. |
+| 9 | Heading | static text | `Sign in to Nexsure` | — | Card title, not interactive — useful as a "page loaded" anchor for automation waits. |
+| 10 | Admin-contact notice | static text | "Please contact your company's Nexsure Administrators…" | — | Confirms Dyad does not manage end-user credentials for this tenant. |
+
+> **Note:** Labels are stored lowercase in the DOM (`username`, `password`) and rendered uppercase purely via CSS `text-transform`. Match on the lowercase text if you select by label content.
+
+### DOM & structure notes
+
+Each input sits inside a `.form_group` wrapper together with its label — this is the most reliable structural hook, since inputs themselves carry no `id` or `name`:
+
+```html
+<div class="form_group nex_required_input noStar">
+  <label class="required_label">username</label>
+  <input type="text" class="form-control form-control-sm">
+</div>
+
+<div class="form_group nex_required_input noStar">
+  <label class="required_label">password</label>
+  <input type="password" class="form-control form-control-sm">
+</div>
+
+<label class="checkbox">
+  <input type="checkbox">Remember Me
+</label>
+```
+
+The `nex_required_input noStar` classes indicate both fields are treated as required by the app, but the usual required-asterisk is suppressed (`noStar`). Elements carry Vue scoped-style attributes, e.g. `data-v-240f170f` — **do not hardcode these hashes as selectors**, they are build-specific.
+
+### Behavior & persistence
+
+- **Remember Me → username persistence.** When previously checked, the typed username is saved to `localStorage["username"]` and re-populates the field automatically on the next page load.
+- **Remember Me checkbox state itself also persists** across reloads — it reflects whatever it was last set to, not a fixed unchecked default.
+- **Password is never persisted.** Always empty on a fresh load regardless of Remember Me.
+- **Storage keys observed:** `mainTabExpiration`, `username`, plus the app-wide Pendo keys. `sessionStorage` is empty. 4 cookies are set (names/values not inspected — treat as session-managed).
+
+### Test credentials
+
+> ⚠️ Recorded here because this KB is the automation reference you asked for. Treat this file as confidential, and prefer pulling these into a secrets manager / environment variables for actual scripts rather than hardcoding them from this doc.
+
+| Field | Value | Notes |
+|---|---|---|
+| Environment | `jmiqaweb01.nexsure.com/nexui/` | QA/automation tenant |
+| Username | `dyad.automation.7772&0724` | Contains a literal `&` — no escaping needed when typed via automation's native "fill" action, but be careful if it's ever built into a URL query string. |
+| Password | `!Dyad0001` | Starts with `!` — same query-string caveat applies. |
+
+### Selectors
+
+| Element | Accessible role / label | Fallback CSS |
+|---|---|---|
+| Username field | textbox, label text `username` | `.form_group:nth-of-type(1) input` |
+| Password field | textbox, label text `password` | `.form_group:nth-of-type(2) input` |
+| Remember Me | checkbox, label text `Remember Me` | `label.checkbox input[type="checkbox"]` |
+| Sign in | button, name `Sign in` | `.nexButton.primary:not(.outlined)` |
+| Forgot Password | button, name `Forgot Password` | `.nexButton.primary.outlined` |
+| Change Password | link, name `Change Password` | — |
+
+> **Note:** Avoid selecting on the `data-v-*` attributes or on Vue-generated class hashes — only the hand-authored classes (`form_group`, `form-control`, `nexButton`, `checkbox`) are safe to depend on across deploys.
+
+### Open items
+
+- Validation/error messaging for empty or incorrect credentials (no failed attempt was triggered).
+- The "Forgot Password" and "Change Password" flows (screens/fields beyond this page).
+- Whether pressing Enter in either field submits, or only the Sign-in button click does.
+- Exact destinations of the two footer download links and the cookie names/purposes.
+
+---
+
+## Page: Dashboard (home, `#/`)
+
+| Fact | Value |
+|---|---|
+| Screen | Dashboard home / "Good Morning, {user}!" |
+| Route | `#/` (hash-based, no full page reload) |
+| Tenant branding | "R5 Insurance Agency" (top-left logo — this is the agency the automation account belongs to, distinct from the Dyad-branded login screen) |
+| Native `<form>` tags | 0 |
+
+### Overview
+
+The dashboard is the landing screen after sign-in. It's a two-column layout: a wider left column with a personalized greeting, a dashboard/view picker, and a grid of stat widgets; a narrower right column showing a "Recently Accessed" list of recently opened client/policy records. A persistent top bar (present on every screen, not just the dashboard) carries global search, several quick-access shortcut icons, and account-level icons on the far right. A floating help/chat bubble sits bottom-right with an unread-count badge.
+
+### Visual layout
+
+```
+┌───────────────────────────────────────────────────────────────────────┐
+│ [R5 Insurance Agency]   [🔍 Enter search keywords] [Search] ⓘ    🏠 👤 🗺 ❓ │  ← persistent top bar
+├───────────────────────────────────────────────────────────────────────┤
+│ Good Morning, {User}!                          Recently Accessed       │
+│ Last sign in was on {date/time}                  {entity link 1}      │
+│                                                   {entity link 2}      │
+│ 🕐 Dashboards: [Overview ▾]  ⓘ                    {entity link 3...}   │
+│                                                                        │
+│ Viewing [My Dashboard ▾]  ⓘ                                           │
+│ ┌───────────────────┬───────────────────┐                            │
+│ │ New Message(s)     │ Actions Due Today │                            │
+│ │ Today          0   │              4    │                            │
+│ │           View All │         View All  │                            │
+│ │ Handled / Change   │ Due this month /  │                            │
+│ │             more▾  │ Past due · more   │                            │
+│ ├───────────────────┼───────────────────┤                            │
+│ │ Pending             │ (Open/Closed      │                            │
+│ │ Cancellations   0   │  breakdown rows)  │                            │
+│ │  Cancelled/Change   │                   │                            │
+│ └───────────────────┴───────────────────┘                            │
+└───────────────────────────────────────────────────────────────────────┘
+                                                        [💬 4]  ← floating help bubble
+```
+
+### Element inventory
+
+| # | Element | Type / role | Visible text | Notes |
+|---|---|---|---|---|
+| 1 | Global search input | textbox | placeholder `Enter search keywords` | Class `.searchBox input`; the search box wrapper has `id="pendoSearchBoxGuide"` (Pendo-instrumented). |
+| 2 | Search button | button | `Search` | `id="PendoSearchGuide"`. |
+| 3 | Quick-access icons (×7) | buttons/icons, titled | `View New Alerts`, `View Phone Calls`, `View New Messages`, `View Today's actions`, `View eServices`, `View eLinks`, `View Bookmarks` | Each is a `.widgetLink` inside `.widgetIcons`; identify by its `title` attribute. Destinations not explored (see Open items). |
+| 4 | Home icon | button | `Home` | Far-right account icon group. |
+| 5 | Profile icon | button | current user's short name, e.g. `Dyad 7772 A.` | Far-right group, 2nd icon. |
+| 6 | Organization icon | button | `Organization` | Far-right group, 3rd icon (sitemap/hierarchy glyph). |
+| 7 | Help icon | button | `Help` | Far-right group, 4th icon. |
+| 8 | Greeting heading | static text | `Good Morning, {user}!` | Text changes with time of day ("Good Afternoon"/"Good Evening") — don't hardcode "Morning" in assertions. |
+| 9 | Last-sign-in line | static text | `Last sign in was on {date/time}` | Timestamp updates every session — not a stable assertion target, only a "logged in" landmark. |
+| 10 | Dashboards selector | combobox (vue-select) | `Overview` | Picks which dashboard *definition* is shown. Selected value renders in `span.selected_dash_header`. |
+| 11 | Viewing selector | combobox (vue-select) | `My Dashboard` | Picks *whose* dashboard is shown; same vue-select component as #10 but carries an extra `.viewMode` class. |
+| 12 | Widget: New Message(s) Today | card, class `.widget_container` | title `New Message(s) Today`, a count, a "View All" link, sub-stats, "more/less" toggle | Left accent bar colored per widget (blue). |
+| 13 | Widget: Actions Due Today | card, class `.widget_container` | title, count, "View All" link, "Due this month" / "Past due" stats, an Open/Closed breakdown sub-panel | Left accent bar green. |
+| 14 | Widget: Pending Cancellations | card, class `.widget_container` | title, count, "Cancelled" / "Change" stats | Left accent bar red. |
+| 15 | Recently Accessed panel | list, class `.recently_accessed` | header `Recently Accessed`, a list of entity links | Each entry is `a.nex_entity_link` inside `.recent_entity`, with a small type icon (e.g. a client icon). Actual entries are tenant business data (client/policy names) — omitted here, see the callout below. |
+| 16 | Help/chat bubble | floating button, bottom-right | unread-count badge (e.g. `4`) | Pendo Resource Center widget (`_pendo-resource-center-badge-container`). |
+
+> ⚠️ The "Recently Accessed" list shows real client/policy record names from this QA tenant. Treat those as tenant business data rather than stable fixtures — they'll differ per user/session and shouldn't be hardcoded into scripts or shared outside this KB.
+
+### DOM & structure notes
+
+- Top bar structure: `.menu_bar > .nav_sections` contains the search icon + `.searchBox`; the quick-access group is `.widgetIcons > .widgetLink[title="..."]` (repeated 7×); the account icons (Home/Profile/Organization/Help) sit in a separate group further right in the same bar. This top bar is shared across screens, not dashboard-specific.
+- Dashboard-specific container starts at `.dash_header` (greeting + dashboard picker) followed by the widget grid and `.recently_accessed` panel.
+- Widgets are Vue components (`vue-select` powers both dropdowns — classes `v-select vs--single vs--searchable`, plus `.viewMode` on the "Viewing" one specifically). Same caution as the login page: don't depend on `data-v-*` hashes.
+- Still zero native `<form>` elements on this screen — confirms the whole app avoids native form submission in favor of JS-driven actions/XHR.
+- `document.title` remains `"Nexsure"` on the dashboard, same as the login screen; the URL hash (`#/`) is the only page-level signal that navigation occurred.
+
+### Behavior & persistence
+
+- No new `localStorage` keys are added by reaching the dashboard — the same keys from the login screen carry over (Pendo keys, `mainTabExpiration`, `username`). Session state appears to live in cookies, not `localStorage`.
+- The greeting and "last sign in" timestamp are dynamic per session/time — don't assert their exact text, only their presence as a "you're logged in" signal.
+- Pendo elements (`id="pendoSearchBoxGuide"`, `id="PendoSearchGuide"`, the Resource Center badge) mean this screen is an active Pendo guide target — expect the possibility of a Pendo tooltip/guide overlay appearing unprompted during a session.
+
+### Selectors
+
+| Element | Accessible role / label | Fallback CSS |
+|---|---|---|
+| Global search input | textbox, placeholder `Enter search keywords` | `.searchBox input` |
+| Search button | button, name `Search` | `#PendoSearchGuide` |
+| Quick-access icon (any) | element with matching `title` | `.widgetIcons [title="View New Alerts"]` (swap the title text per icon) |
+| Home icon | button, name `Home` | far-right nav group, 1st icon |
+| Profile icon | button, name = current user's short name | far-right nav group, 2nd icon |
+| Organization icon | button, name `Organization` | far-right nav group, 3rd icon |
+| Help icon | button, name `Help` | far-right nav group, 4th icon |
+| Dashboards selector | combobox, current value `Overview` | `.v-select:not(.viewMode)` |
+| Viewing selector | combobox, current value `My Dashboard` | `.v-select.viewMode` |
+| Widget "View All" link | link, name `View All` | `.widget_container a` (filter by visible text) |
+| Widget more/less toggle | button/text `more` / `less` | `.viewMore` |
+| Recently Accessed entries | link, entity name as text | `.recently_accessed .nex_entity_link` |
+
+### Open items
+
+- Destinations/behavior of the 7 quick-access icons (Alerts, Phone Calls, Messages, Today's actions, eServices, eLinks, Bookmarks) — not clicked through yet.
+- Destinations of the Home, Organization, and Help icons.
+- Options available inside the "Dashboards: Overview" and "Viewing: My Dashboard" dropdowns (not opened).
+- Global search results screen/behavior.
+- Full widget catalog — only 3 widgets were visible in the default "My Dashboard" view; other dashboard/view combinations may show more.
+- Navigation structure beyond the dashboard (left/side module menu, if any — none was visible on this screen).
+
+---
+
+*Captured from the QA environment (jmiqaweb01) for Dyad Inc. web-automation work.*

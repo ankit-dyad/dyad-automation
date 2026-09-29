@@ -1,0 +1,58 @@
+{
+  "product": "alis_core",
+  "status": "in_progress",
+  "application": "ALIS Core (Accounting — Bulk Payment Upload to Remittance flow, Dyad Tech DC test data)",
+  "environments": [
+    { "name": "Prod (Dyad Tech)", "baseUrlEnvVar": "ALIS_CORE_BASE_URL" }
+  ],
+  "activeBaseUrlEnvVar": "ALIS_CORE_BASE_URL",
+  "baseUrl": "https://prod-alis-4-1-21.dyadtech.com/ALIS.BMS/APP/#/login",
+  "framework": "Angular SPA (hash-based routing, #/login)",
+  "appVersion": "4.1.21.5",
+  "appVersionDate": "2026-09-03",
+  "credentials": [
+    {
+      "note": "No literal credential is stored here, unlike alis/knowledge/data.json's flagged UAT exception. Set ALIS_CORE_LOGIN_USER / ALIS_CORE_LOGIN_PASS in the environment before running alis_core specs — see framework/utils/env.ts's getCredential() fallback contract."
+    }
+  ],
+  "testEntities": [
+    {
+      "agentCode": "AGT003",
+      "entityName": "Dyad Tech DC",
+      "costCenter": "Salary-DC",
+      "note": "Reference test data used throughout the manual QA pass this automation is derived from. Not a synthetic per-run value — do not mutate/delete this entity from a test; use framework/fixtures factories for anything that needs to be created and torn down per run."
+    }
+  ],
+  "loginFlow": {
+    "path": "#/login",
+    "confirmed": true,
+    "steps": [
+      "Navigate to ALIS_CORE_BASE_URL#/login",
+      "Fill #txtUserName with ALIS_CORE_LOGIN_USER",
+      "Fill #txtPassword with ALIS_CORE_LOGIN_PASS",
+      "Click button[type=submit]:has-text(\"Log In\")"
+    ],
+    "postLogin": {
+      "landingRoute": null,
+      "popup": {
+        "present": null,
+        "note": "Not yet confirmed on this environment/user — verify on first real credentialed run, then update this file and alis_core/knowledge/pages/login.md together."
+      }
+    }
+  },
+  "primaryNavigation": [
+    "Accounting > Bulk Payment Upload",
+    "Accounting > Batch List",
+    "Accounting > Invoice Application",
+    "Accounting > Check Register",
+    "Accounting > Check Summary",
+    "Accounting > Print Check",
+    "Accounting > Remittance Advice",
+    "Agency Admin > Bank Setup"
+  ],
+  "openItems": [
+    "Real credentials for ALIS_CORE_LOGIN_USER/ALIS_CORE_LOGIN_PASS have not been exercised against #/login in this automation pass (only the unauthenticated form itself was inspected, read-only) — the post-login landing route and whether a startup message popup appears (as it does on alis/ UAT) are unconfirmed.",
+    "Remaining pages in the Bulk Payment Upload to Remittance flow (Batch Setup, Bank Setup, Batch List, Invoice Application, Batch Transaction Detail, Check Register, Check Summary, Print Check, Remittance Advice) are not yet documented as knowledge pages or automated — login is the first slice."
+  ],
+  "lastVerified": "2026-09-18"
+}

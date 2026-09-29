@@ -1,0 +1,96 @@
+{
+  "product": "nexsure",
+  "status": "scaffold",
+  "application": null,
+  "environments": [
+    {
+      "name": "QA",
+      "baseUrlEnvVar": "NEXSURE_QA_BASE_URL"
+    },
+    {
+      "name": "Staging",
+      "baseUrlEnvVar": "NEXSURE_STAGING_BASE_URL"
+    }
+  ],
+  "activeBaseUrlEnvVar": "NEXSURE_BASE_URL",
+  "baseUrl": null,
+  "framework": null,
+  "appVersion": null,
+  "appVersionDate": null,
+  "credentials": [
+    {
+      "role": "Standard agent",
+      "usernameEnvVar": "NEXSURE_LOGIN_USER",
+      "passwordEnvVar": "NEXSURE_LOGIN_PASS",
+      "username": "dyad.automation.7772&0724",
+      "password": "!Dyad0001"
+    }
+  ],
+  "loginFlow": {
+    "path": "/login",
+    "confirmed": false,
+    "steps": [
+      "Navigate to ${NEXSURE_BASE_URL}/login",
+      "Fill the username field with NEXSURE_LOGIN_USER",
+      "Fill the password field with NEXSURE_LOGIN_PASS",
+      "Submit and wait for the post-login landing page (see pages/dashboard.md)"
+    ]
+  },
+  "primaryNavigation": [],
+  "createClient": {},
+  "openItems": [
+    "No exploration run yet — run agents/explorer-agent.ts against a real Nexsure environment to populate this file."
+  ],
+  "lastVerified": null,
+  "newClient": {
+    "clientType": "Personal",
+    "locationType": "Home Office",
+    "streetAddress": "326 E 7th St",
+    "city": "Leadville",
+    "state": "Colorado",
+    "zip": "80461"
+  },
+  "addContect": {
+    "lastName": "Automation"
+  },
+  "assignment": {
+    "branch": "2.5 branch",
+    "department": "Allied Health",
+    "responsibility": "Account Executive",
+    "employee": "Automation, DyadQA2.5"
+  },
+  "policyLifecycle": {
+    "product": "X100_Commercial Lines",
+    "lineOfBusiness": "X100_General Liability (126)",
+    "issuingCarrier": "AAA Carrier",
+    "billingCarrier": "AAA Carrier",
+    "notes": "Product/LOB/Carrier are real tenant master data (see nexsure/knowledge/pages/opportunities_new.md and opportunuty_quote_info.md) — not per-run synthetic values."
+  },
+  "endorsement": {
+    "description": "Process endorsement.",
+    "notes": "Process endorsement."
+  },
+  "policyEdit": {
+    "description": "Policy edit transaction"
+  },
+  "renewal": {
+    "description": "Policy renewal"
+  },
+  "cancellation": {
+    "reason": "Insured Request",
+    "method": "Flat",
+    "status": "Appointment"
+  },
+  "rewrite": {
+    "primaryState": "Colorado"
+  },
+  "existingClient": {
+    "name": "automation_001",
+    "notes": "A pre-existing client record in the QA tenant, found via Find a Client's Keywords search rather than created fresh each run — used by the policy_lifecycle_existing_client test so repeat runs don't need a brand-new client every time."
+  },
+  "createdClient": {
+    "name": "Automation Client fd9a29f5",
+    "createdAt": "2026-09-25T11:54:24.088Z",
+    "notes": "Populated automatically by createClient.test.ts (via framework/utils/dataStore.ts's saveProductData) after each run with the freshly created client's name — read this from other tests that need to act on the client just created, as opposed to existingClient's stable, unchanging fixture."
+  }
+}
