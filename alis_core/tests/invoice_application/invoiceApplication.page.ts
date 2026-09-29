@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { InvoiceApplicationLocators } from './invoiceApplication.locators';
@@ -32,7 +32,36 @@ export class InvoiceApplicationPage extends BasePage {
     await this.click(this.locators.batchListTab);
   }
 
-  /** Opens the first batch's Payment tab. */
+  /** Reads the first (unfiltered) row's Batch No so the spec can search for
+   * a batch number that actually exists right now, instead of hardcoding one
+   * or grabbing "whichever is first" — this environment's batch data is real
+   * and changes over time (see payment-batch-list.md's "Notable behavior"). */
+  async readFirstBatchNo(): Promise<string> {
+    return this.textOf(this.locators.firstRowBatchNoCell);
+  }
+
+  async openFiltersPanel(): Promise<void> {
+    await this.click(this.locators.filtersTab);
+  }
+
+  async expandBatchNoFilter(): Promise<void> {
+    await this.click(this.locators.batchNoGroupHeader);
+  }
+
+  /** Isolates the Batch List grid to just one Batch No, using only the
+   * `(Select All)` toggle — same recipe as
+   * batchListSearchByNumber.page.ts's isolateBatchNo(), reused here so this
+   * feature opens a specific, just-confirmed-to-exist batch rather than
+   * "whichever is first". See payment-batch-list.md's Selectors table for
+   * why toggling an individual value's own checkbox is unreliable here. */
+  async isolateBatchNo(batchNo: string): Promise<void> {
+    await this.click(this.locators.selectAllCheckbox);
+    await this.enter(this.locators.batchNoSearchInput, batchNo);
+    await this.click(this.locators.selectAllCheckbox);
+  }
+
+  /** Opens the isolated batch's Payment tab — after isolateBatchNo() narrows
+   * the grid to exactly one row, `firstRowAddEditIcon` correctly targets it. */
   async openFirstBatchPaymentTab(): Promise<void> {
     await this.click(this.locators.firstRowAddEditIcon);
   }
@@ -109,6 +138,10 @@ export class InvoiceApplicationPage extends BasePage {
 
   get batchListTabLocator() {
     return this.locators.batchListTab;
+  }
+
+  get batchListGridRowsLocator() {
+    return this.locators.batchListGridRows;
   }
 
   get openModalLocator() {

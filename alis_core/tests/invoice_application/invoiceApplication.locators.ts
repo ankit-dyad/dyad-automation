@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 
 /**
  * Locator definitions for the Alis Core Accounting Payment screen's path
@@ -9,15 +9,61 @@ import type { Page } from '@playwright/test';
  * invoiceApplication.test.ts.
  */
 export class InvoiceApplicationLocators {
+  private readonly batchListPane = this.page.locator('#pills-batch');
+
   constructor(private readonly page: Page) {}
 
   get batchListTab() {
     return this.page.getByRole('tab', { name: 'Batch List' });
   }
 
+  get batchListGridRows() {
+    return this.batchListPane.locator('.ag-center-cols-container .ag-row');
+  }
+
+  get firstRowBatchNoCell() {
+    return this.batchListPane.locator('.ag-center-cols-container [col-id="batch_no"]').first();
+  }
+
+  /** ag-Grid's built-in Filters tool panel on the Batch List grid — same
+   * mechanism as payment-batch-list.md's Selectors table /
+   * alis_core/tests/batch_list_search_by_number, reused here so this
+   * feature's tests can open a specific batch instead of "whichever is
+   * first" (this environment's data changes over time — see
+   * payment-batch-list.md's "Notable behavior"). Scoping under this wrapper
+   * (rather than the whole pane) avoids accidentally matching the grid's own
+   * "Batch No" column header, which has the same visible text. */
+  get filterToolPanel() {
+    return this.batchListPane.locator('.ag-tool-panel-wrapper');
+  }
+
+  get filtersTab() {
+    return this.batchListPane.getByRole('tab', { name: 'Filters' });
+  }
+
+  get batchNoGroupHeader() {
+    return this.filterToolPanel.getByRole('button', { name: 'Batch No' });
+  }
+
+  get batchNoSearchInput() {
+    return this.filterToolPanel.getByRole('textbox', { name: 'Search filter values' });
+  }
+
+  /** `(Select All)` pseudo-item's own checkbox — the only reliable way to
+   * change the applied filter (see batchListSearchByNumber.locators.ts's
+   * identical note and payment-batch-list.md's Selectors table). */
+  get selectAllCheckbox() {
+    return this.filterToolPanel
+      .locator('.ag-set-filter-item, .ag-list-item')
+      .filter({ hasText: '(Select All)' })
+      .locator('input[type="checkbox"]');
+  }
+
   /** `title` attribute confirmed to have a trailing space
    * ("Transaction Add/Edit ") — matched with a prefix selector to avoid
-   * that landmine. See payment-batch-list.md's Selectors table. */
+   * that landmine. See payment-batch-list.md's Selectors table. Once the
+   * grid has been isolated to a single Batch No (see isolateBatchNo()),
+   * `.first()` correctly targets that one row. */
   get firstRowAddEditIcon() {
     return this.page.locator('#pills-batch .ag-pinned-right-cols-container .ag-row i[title^="Transaction Add/Edit"]').first();
   }

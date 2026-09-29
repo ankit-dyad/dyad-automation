@@ -1,4 +1,4 @@
-import { test, expect } from '../../../framework/fixtures';
+﻿import { test, expect } from '../../../framework/fixtures';
 import { getCredential } from '../../../framework/utils/env';
 import { reportedStep } from '../../../framework/utils/reportStep';
 import { waitForVisible } from '../../../framework/utils/waits';
@@ -18,7 +18,8 @@ import { InvoiceApplicationPage } from './invoiceApplication.page';
  *
  * Does not drive the From/To Date pickers (fragile `app-date-picker` popup,
  * not yet characterized in this app) — only the Based On dropdown switch is
- * exercised. See invoice-application.md's Edge Cases.
+ * exercised (Acct Eff Date / Due Date / Invoice Date). See
+ * invoice-application.md's Edge Cases.
  */
 test(
   'Alis Core: standard agent can filter Invoice Application by Quick Search, Based On, Billing Method, and voucher checkboxes',
@@ -54,22 +55,46 @@ test(
       `Logged in to Alis Core Accounting as "${username}".`,
     );
 
+    let batchNo = '';
     await reportedStep(
       page,
       testInfo,
-      'Open the first batch, then Invoice Application for its first payment',
+      'Open Batch List and search for a specific batch by its Batch No',
       async () => {
+        // Reads whichever batch happens to be first (this production-looking
+        // environment's data changes over time — see payment-batch-list.md's
+        // "Notable behavior"), then re-isolates the grid to that exact Batch
+        // No via the Filters panel's (Select All) recipe — the same
+        // mechanism already verified in
+        // alis_core/tests/batch_list_search_by_number — instead of just
+        // acting on "whichever row is first" without confirming it.
         await invoiceApplicationPage.goto();
         await waitForVisible(invoiceApplicationPage.batchListTabLocator);
         await invoiceApplicationPage.openBatchListTab();
 
+        batchNo = await invoiceApplicationPage.readFirstBatchNo();
+        await invoiceApplicationPage.openFiltersPanel();
+        await invoiceApplicationPage.expandBatchNoFilter();
+        await invoiceApplicationPage.isolateBatchNo(batchNo);
+
+        await expect(invoiceApplicationPage.batchListGridRowsLocator).toHaveCount(1);
+        return batchNo;
+      },
+      (foundBatchNo) => `Opened Batch List, read Batch No "${foundBatchNo}", then searched the Filters panel's Batch No column for it — the grid narrowed to exactly that 1 matching row.`,
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Open that batch, then Invoice Application for its first payment',
+      async () => {
         await invoiceApplicationPage.openFirstBatchPaymentTab();
         await invoiceApplicationPage.openInvoiceApplicationForFirstRecord();
 
         await expect(invoiceApplicationPage.openModalLocator).toBeVisible();
         await expect(invoiceApplicationPage.clientFieldLocator).not.toBeEmpty();
       },
-      'Opened Batch List, drilled into the first batch\'s Payment tab, and opened the Invoice Application (+) icon for its first record — the modal opened with the Client field pre-populated.',
+      () => `Opened batch #${batchNo}'s Payment tab and opened the Invoice Application (+) icon for its first record — the modal opened with the Client field pre-populated.`,
       [
         { label: 'Invoice Application modal', locator: invoiceApplicationPage.openModalLocator },
         { label: 'Client field', locator: invoiceApplicationPage.clientFieldLocator },
@@ -124,6 +149,23 @@ test(
         await expect(invoiceApplicationPage.openModalLocator).toBeVisible();
       },
       'Switched the "Based On" dropdown from Acct Eff Date to "DUEDATE" and re-ran Search — the modal remained open and the dropdown kept the new value.',
+      { label: 'Based On dropdown', locator: invoiceApplicationPage.basedOnDropdownLocator },
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Based On can also be switched to Invoice Date',
+      async () => {
+        // Same rationale/caveat as the Due Date step above — only the
+        // dropdown switch is exercised, not the date-range picker itself.
+        await invoiceApplicationPage.selectBasedOn('INVOICEDATE');
+        await expect(invoiceApplicationPage.basedOnDropdownLocator).toHaveValue('INVOICEDATE');
+
+        await invoiceApplicationPage.clickSearch();
+        await expect(invoiceApplicationPage.openModalLocator).toBeVisible();
+      },
+      'Switched the "Based On" dropdown to "INVOICEDATE" and re-ran Search — the modal remained open and the dropdown kept the new value.',
       { label: 'Based On dropdown', locator: invoiceApplicationPage.basedOnDropdownLocator },
     );
 

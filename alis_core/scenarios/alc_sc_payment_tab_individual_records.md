@@ -1,4 +1,4 @@
----
+﻿---
 product: alis_core
 journey: payment-upload-to-remittance
 pages: [login, payment-batch-list, payment-tab-individual-records]
@@ -26,8 +26,15 @@ alis_core/knowledge/pages/payment-tab-individual-records.md.
 Read-only: verifies whichever batch is first in the default Batch List grid
 and whichever payment records it already has, rather than uploading/entering
 a fresh one. Save Payment, Add Invoice, Edit Transaction, and Delete
-Transaction are never clicked in this pass — this is purely a verification
-pass of an existing batch's already-saved records.
+Transaction are never clicked in this pass - this is purely a verification
+pass of an existing batch's already-saved records. The genuinely-new-batch
+half is covered separately, in
+alis_core/tests/payment_upload_save_payment/paymentUploadSavePayment.test.ts
+(the "Verify batch #<N>'s own Payment tab individual records" step, added
+2026-09-29 with the user's explicit go-ahead to run it), reusing that spec's
+already-approved real Save Payment write rather than adding a second,
+independent real-write test here.
+
 
 Confirmed necessary: the grid's rightmost columns (Status, Tran Description,
 Doc No, User, Updated Date) don't render until the grid is actually scrolled

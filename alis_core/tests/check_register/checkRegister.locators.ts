@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 
 /**
  * Locator definitions for the Alis Core Accounting "Check Register" screen —
@@ -54,6 +54,63 @@ export class CheckRegisterLocators {
    * check-register.md's Edge Cases for why. */
   clientTypeOptionRow(label: string) {
     return this.clientTypeOption(label).locator('xpath=ancestor::li[1]');
+  }
+
+  get banksMultiselect() {
+    return this.pane.locator('#ddlBankGL');
+  }
+
+  get banksMultiselectToggle() {
+    return this.pane.locator('#ddlBankGL .dropdown-btn');
+  }
+
+  /** Same `ng-multiselect-dropdown` shape/quirks as Client Type — see
+   * clientTypeOption()/clientTypeOptionRow() for why option rows (not the
+   * checkbox inputs) are the clickable target. */
+  banksOption(label: string) {
+    return this.pane.locator(`#ddlBankGL input[aria-label="${label}"]`);
+  }
+
+  banksOptionRow(label: string) {
+    return this.banksOption(label).locator('xpath=ancestor::li[1]');
+  }
+
+  get paymentTypeMultiselect() {
+    return this.pane.locator('#ddlpaymenttype');
+  }
+
+  get paymentTypeMultiselectToggle() {
+    return this.pane.locator('#ddlpaymenttype .dropdown-btn');
+  }
+
+  /** Same `ng-multiselect-dropdown` shape/quirks as Client Type — see
+   * clientTypeOption()/clientTypeOptionRow() for why option rows (not the
+   * checkbox inputs) are the clickable target. */
+  paymentTypeOption(label: string) {
+    return this.pane.locator(`#ddlpaymenttype input[aria-label="${label}"]`);
+  }
+
+  paymentTypeOptionRow(label: string) {
+    return this.paymentTypeOption(label).locator('xpath=ancestor::li[1]');
+  }
+
+  /** ag-Grid's generated id is fragile (see check-register.md's Edge Cases) —
+   * matched by role/name instead, scoped to the active pane. */
+  get columnsSideTab() {
+    return this.pane.getByRole('tab', { name: 'Columns' });
+  }
+
+  get filtersSideTab() {
+    return this.pane.getByRole('tab', { name: 'Filters' });
+  }
+
+  /** ag-Grid's own tool-panel wrapper, opened by columnsSideTab/filtersSideTab
+   * — same `.ag-tool-panel-wrapper` class as payment-batch-list.md's Filters
+   * panel (confirmed there via live DOM inspection; this is ag-Grid's own
+   * standard tool-panel markup, not app-specific, so the same class applies
+   * to this grid's Columns tab too). */
+  get columnsToolPanel() {
+    return this.pane.locator('.ag-tool-panel-wrapper');
   }
 
   get searchByDropdown() {
