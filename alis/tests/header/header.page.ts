@@ -15,8 +15,8 @@ export class HeaderPage extends BasePage {
     this.locators = new HeaderLocators(page);
   }
 
-  async clickLogo(): Promise<void> {
-    await this.click(this.locators.logoLink);
+  async clickWorkspaceLink(): Promise<void> {
+    await this.click(this.locators.workspaceLink);
   }
 
   async selectSearchType(value: string): Promise<void> {
@@ -27,13 +27,22 @@ export class HeaderPage extends BasePage {
     await this.enter(this.locators.searchBox, value);
   }
 
+  async openAvatarDropdown(): Promise<void> {
+    await this.click(this.locators.userAvatar);
+  }
+
+  async logout(): Promise<void> {
+    await this.openAvatarDropdown();
+    await this.click(this.locators.avatarDropdownLogoutLink);
+  }
+
   /** Exposed for the spec to assert on — assertions belong in the test, not here. */
   get headerBarLocator() {
     return this.locators.headerBar;
   }
 
-  get logoLinkLocator() {
-    return this.locators.logoLink;
+  get workspaceLinkLocator() {
+    return this.locators.workspaceLink;
   }
 
   get searchTypeDropdownLocator() {
@@ -46,5 +55,17 @@ export class HeaderPage extends BasePage {
 
   get userAvatarLocator() {
     return this.locators.userAvatar;
+  }
+
+  get avatarDropdownProfileLinkLocator() {
+    return this.locators.avatarDropdownProfileLink;
+  }
+
+  get avatarDropdownChangePasswordLinkLocator() {
+    return this.locators.avatarDropdownChangePasswordLink;
+  }
+
+  get avatarDropdownLogoutLinkLocator() {
+    return this.locators.avatarDropdownLogoutLink;
   }
 }

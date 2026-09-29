@@ -1,0 +1,25 @@
+{
+  "coverageTab": "COMMERCIAL GENERAL LIABILITY",
+  "coverageTabNote": "Not currently consumed by add-edit-risk.test.ts — kept for a future quote with more than one coverage, which may need an explicit tab switch. See add-edit-risk.page.ts's selectCoverage() comment.",
+  "limitsAndDeductibles": {
+    "generalAggregate": "200000",
+    "productsCompletedOperationsAggregate": "100000",
+    "personalAdvertisingInjury": "100000",
+    "eachOccurrence": "100000",
+    "damageToRentedPremises": "100000",
+    "medicalExpense": "10000",
+    "bodilyInjuryPropertyDamageDeductible": "5000",
+    "deductibleBasisValue": "1",
+    "deductibleBasisNote": "Raw <select> option value, not a visible label — captured as-is from a Playwright codegen recording against this dyad-branded instance, confirmed identical in a second recording. Which visible option '1' corresponds to was not confirmed in either recording; add-edit-risk.md documents this same dropdown as not rendering a normal clickable options list on this build (native select type-ahead workaround needed instead), so this value should be treated as unverified until confirmed on a real run."
+  },
+  "classification": {
+    "classCodeSearch": "63010",
+    "suggestionText": "(63010) Dwellings - 1 family",
+    "Classification Code": "63010",
+    "premiumCodeValue": "T",
+    "exposure": "1000",
+    "minPremium": "0",
+    "classificationNote": "Rebuilt 2026-09-25 from a second, more complete Playwright codegen recording that showed this screen's real flow — type the numeric class code into the search field, click the resulting suggestion, then fill Premium Code/Exposure/Min Premium. This replaces this project's earlier classCode/classDesc fields, which were a guess based on a first recording that never actually showed those fields being used. premiumCodeValue is a raw <select> option value ('T'), not a visible label, same convention as deductibleBasisValue above."
+  },
+  "dataSource": "Extracted from two user-supplied Playwright codegen recordings against customer-alis.dyadtech.com (2026-09-25), not from this project's own live-verification pass — see add-edit-risk.page.ts's own class comment. Values may need correction once actually run."
+}

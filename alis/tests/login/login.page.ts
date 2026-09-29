@@ -9,9 +9,12 @@ import { LoginLocators } from './login.locators';
  */
 export class LoginPage extends BasePage {
   /* No leading slash: this is a hash-only reference, resolved against a baseURL
-   * that must end with a trailing slash (e.g. ".../ALIS.BMS/APP/") so it lands on
+   * that must end with a trailing slash (e.g. "https://customer-alis.dyadtech.com/
+   * ALIS.BMS/APP/", set via ALIS_UAT_BASE_URL) so it lands on
    * ".../ALIS.BMS/APP/#/login" — a leading slash would drop the "/ALIS.BMS/APP"
-   * prefix entirely when Playwright joins it against baseURL. */
+   * prefix entirely when Playwright joins it against baseURL. Confirmed live
+   * 2026-09-24 that this instance uses the identical /ALIS.BMS/APP/#/login path
+   * shape as the original sample's environment — only the domain differs. */
   protected override path = '#/login';
 
   private readonly locators: LoginLocators;
@@ -49,12 +52,21 @@ export class LoginPage extends BasePage {
     await this.click(this.locators.resourceCenterButton);
   }
 
-  /** A startup message popup opens on every successful login in UAT (confirmed
-   * 2026-09-10 — see alis/knowledge/pages/login.md). Closes it and waits for it
-   * to actually disappear. */
-  async closeStartupMessagePopup(): Promise<void> {
+  /** A startup message popup opens on every successful login on the framework's
+   * original (novatae.com) environment, but was NOT observed on this dyad-branded
+   * instance (confirmed 2026-09-24 — see login.md). Defensive/optional: waits
+   * briefly for the popup and closes it only if it actually appears, rather than
+   * assuming either environment's behavior. */
+  async closeStartupMessagePopupIfPresent(timeoutMs = 3000): Promise<void> {
+    const popup = this.locators.startupMessagePopup;
+    const appeared = await popup
+      .waitFor({ state: 'visible', timeout: timeoutMs })
+      .then(() => true)
+      .catch(() => false);
+    if (!appeared) return;
+
     await this.click(this.locators.startupMessageCloseButton);
-    await this.locators.startupMessagePopup.waitFor({ state: 'hidden' });
+    await popup.waitFor({ state: 'hidden' });
   }
 
   /** Exposed for the spec to assert on — assertions belong in the test, not here. */

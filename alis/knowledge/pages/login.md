@@ -1,56 +1,46 @@
----
-reviewed: false
-last_verified: 2026-09-10
----
+Login (ALIS)
 
-# Page: Login
+Overview
+The sign-in screen for the "dyad"-branded ALIS instance at `https://customer-alis.dyadtech.com`. This is a separate, independently-configured instance from the Novatae UAT instance referenced elsewhere in this knowledge base (see the "Environment variant" notes in `add-edit-risk.md`, `add-quote.md`, `market-selection.md`, `new-insured-form.md`, and `commercial-property-building.md`) — do not assume credentials, agency data, or UI behavior carry over between the two.
 
-## URL
+Field
+Value
+Application
+ALIS (Alis Core / Alis Custom — Dyad Tech Private Limited automation POC)
+Environment
+customer-alis.dyadtech.com, build v4.1.19.5 (footer reads "Version Number: 4.1.19.5, Release Date: 07/03/2026")
+URL
+https://customer-alis.dyadtech.com
+Credentials (this pass)
+testqa1 / Welcome@1234 — confirmed unchanged and working across this entire session, contrary to an earlier assumption (raised mid-session) that credentials had changed. If login fails, don't assume the password rotated — check for a typo or a caps-lock/whitespace issue first.
 
-`https://alisuat.novatae.com/ALIS.BMS/APP/#/login` (UAT). Angular SPA, hash-based
-routing — the Page Object's path is the hash-only reference `#/login`, resolved
-against `ALIS_UAT_BASE_URL` which must include the trailing slash
-(`https://alisuat.novatae.com/ALIS.BMS/APP/`) so the join lands on the URL above.
-App version (footer): 4.1.12.121 (released 2025-05-11).
+Layout
+A centered login card on a plain background, "dyad"-branded (not the Novatae/ALIS branding seen on the other UAT instance). The footer of the login page shows the build's version number and release date (see above) — a quick way to confirm which environment/build you're actually pointed at before doing any other verification.
+
+Behavior confirmed this pass
+- Successful login with testqa1/Welcome@1234 lands on the Follow Up list (`#/followup`) as the default post-login page — see `followup-list.md`.
+- The top header (apps-grid icon, "ALIS" wordmark, search bar, user avatar, etc.) is present immediately after login and is consistent across every page of the app thereafter — see `header.md`.
+
+Open items / to verify
+- Behavior on a failed login attempt (error message wording, lockout behavior, rate limiting).
+- Whether there's an SSO option on this login screen (Forgot Password exists — see Selectors below).
+- Whether MFA/2FA is configured for this account or environment.
+- Session timeout behavior (how long testqa1 stays logged in before being kicked back to this screen).
+- Whether the post-login startup-message popup documented for the old novatae.com instance also appears here — NOT observed on this instance in a fresh-login pass (2026-09-24): login completed and landed directly on `#/followup` with no popup, no "Close" interaction needed. Treat as instance-specific behavior (novatae.com: popup present; dyadtech.com: not observed) rather than assuming it copies over — see login.page.ts's `login()` for how this is handled.
 
 ## Selectors
+Captured live (2026-09-24) via the page's own accessibility tree — role/accessible-name/placeholder locators, per knowledge/conventions.md's priority order (role+name and label/placeholder rank above raw CSS, so these are preferred over the `#txtUserName`-style ids used in the framework's original sample, which predates this instance and wasn't re-verified here).
+
 | Element | Selector | Notes |
 |---|---|---|
-| User Name field | `#txtUserName` | input[type=text], placeholder "User Name" |
-| Password field | `#txtPassword` | input[type=password], placeholder "Password" |
-| Log In button | `button[type=submit]:has-text("Log In")` | no id; class `btn btn-lg btn-primary mb-0 py-3` |
-| Forgot Password link | `a[href="#/forgotpassword"]` | text: "Forgot Password?" |
-| Resource Center button | `button[aria-label="Open Resource Center"]` | bottom-left `?` icon; verify exact accessible name at runtime |
-| Startup message popup | `getByRole('dialog')` | `<modal-container role="dialog" ...>` wrapping a `<lib-startup-message>` component (tabs: "Visit Notes" / "Message"); opens automatically right after a successful login |
-| Startup message Close button | `getByRole('dialog').getByRole('button', { name: 'Close' })` | third item in the modal's pill-tab bar; unlike the other two tabs it has no `data-bs-target` — it dismisses the modal instead of switching tabs |
-
-## Actions
-
-- Enter a username into the User Name field.
-- Enter a password into the Password field.
-- Click "Log In" to submit the form.
-- Click "Forgot Password?" to go to password recovery (not yet documented as its own page).
-- Click the Resource Center button to open the help widget (not yet documented).
-- Click the startup message popup's "Close" button to dismiss it after login.
-
-## Expected Outcomes
-
-- Valid credentials navigate to `#/followup` (confirmed by direct observation
-  2026-09-10) and a startup message popup (`getByRole('dialog')`) opens
-  automatically. Closing it via its "Close" button hides the dialog.
-- Invalid credentials show a validation/error message — selector and exact text not
-  yet captured.
-
-## Edge Cases / Known Quirks
-
-- Angular SPA with hash-based routing (`#/login`) — URL assertions must check the
-  hash, not just the path.
-- Credentials for UAT are `ALIS_UAT_USERNAME` / `ALIS_UAT_PASSWORD` — see
-  `alis/knowledge/data.json`. Never hardcode the literal values in test source.
-- The startup message popup opens on every successful login in this UAT
-  environment — treat it as part of the standard login flow, not an edge case to
-  branch on. Whether it can ever be suppressed (e.g. a "don't show again" setting)
-  is not yet known.
+| User Name field | `page.getByPlaceholder('User Name')` | `<input type="text">`, role=textbox, accessible name "User Name" |
+| Password field | `page.getByPlaceholder('Password')` | `<input type="password">`, role=textbox, accessible name "Password" |
+| Log In button | `page.getByRole('button', { name: 'Log In' })` | `type="submit"` |
+| Forgot Password link | `page.getByRole('link', { name: 'Forgot Password?' })` | `href="#/forgotpassword"` |
+| Open Resource Center button | `page.getByRole('button', { name: 'Open Resource Center' })` | bottom-left `?` icon |
 
 ## Auto-discovered (needs review)
 - (agent appends here; engineer reviews and folds into sections above)
+
+Data used to produce this document
+Login performed with testqa1 / Welcome@1234 against `https://customer-alis.dyadtech.com` (v4.1.19.5) at the start of this session, and re-confirmed working (no credential change) partway through the same session after an initial assumption that it might have changed.

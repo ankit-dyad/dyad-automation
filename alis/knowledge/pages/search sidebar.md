@@ -27,6 +27,7 @@ These are presumed to be ANDed together when multiple are filled in; the "Or" ne
 "Add Search Criteria" builder
 Lets you add further criteria beyond the four defaults:
 
+
 Field dropdown — one of: Insured Name, DBA, Mailing Address1, Mailing Address2, Mailing City, Mailing State, Mailing Zip, Physical Address1, Mailing Phone, Physical Address2, Physical City, Physical State, Physical Zip, Policy Number, Co-Applicant, Risk Address 1, Risk Address 2, Risk City, Risk State, Risk Zip, FEIN, SSN, SLA Number, Submission, Agency, Quote, UW/Broker.
 Operator dropdown — START WITH, CONTAINS (default), SOUNDS LIKE, EQUAL TO.
 A text box for the value.

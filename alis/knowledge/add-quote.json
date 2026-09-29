@@ -1,17 +1,19 @@
 {
   "tab": "Binding",
-  "coverage": "Commercial Package",
-  "cob": "Commercial Package",
+  "coverage": "COMMERCIAL GENERAL LIABILITY",
+  "cob": "ARTISAN CONTRACTOR",
   "product": null,
   "operation": null,
-  "filingState": "Connecticut",
+  "filingState": "Florida",
+  "filingStateNote": "This is Florida, distinct from the Mississippi filing state used on the Create Submission step for the same test pass. Per testing-process-notes.md/quote-option-details.md, filing state drives which state-specific forms auto-attach and which of the 10 'should be removed' reference forms are actually present (E602FL, 'Florida Changes - Cancellation and Nonrenewal', is a Florida-only form and should be EXPECTED present and deletable this time, unlike prior Mississippi/Connecticut passes where it was absent) — see terms-forms.json.",
   "term": 12,
-  "proposedEffective": "08/26/2026",
-  "proposedExpiry": "08/26/2027",
+  "proposedEffective": "{{TODAY}}",
+  "proposedExpiry": "{{TODAY+12M}}",
+  "dateConvention": "Same convention as create-submission.json's dateConvention block — resolve to the actual run date, never hardcode. Captured sample this pass: proposedEffective 09/21/2026, proposedExpiry 09/21/2027 (illustrative only).",
   "addMarketDetail": [
     {
-      "marketCompany": "Hadron Specialty Insurance Company (M-RM0164-007)",
-      "riskCo": "Hadron Specialty Insurance Company (R4970-003)"
+      "marketCompany": "Nautilus Insurance Market Group (CMP008)",
+      "riskCo": "Nautilus Insurance Group"
     }
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "assertionMode": "compareToDisplayed",
+  "assertionModeNote": "Per explicit instruction: premium figures on this screen are expected to vary run to run (carrier rating tables change over time — see rate-summary.md's own 'don't treat rated amounts as fixed constants' caution). The test must NOT assert equality against the literal totalPolicyPremium/classcodePremium values captured below. Instead: (1) capture whatever the Rate Summary screen currently displays for this classcode/exposure combination, (2) assert internal consistency — Total Policy Premium equals the sum of its Classcode Premium line(s), Classcode Premium equals Exposure x Final Rate for this classcode, Final Rate equals Prem Rate + Prod Rate — and (3) assert that the SAME figure is then reflected back on the Quote Option Detail page's Premium tab / header after Close & Apply (see quote-option-details.md). The literal numbers below exist only as a reference sample from the pass that produced this data.",
+  "referenceSample": {
+    "quoteNumber": "SUB000478-09",
+    "namedInsured": "Dyad Test",
+    "effectiveDate": "09/21/2026",
+    "expirationDate": "09/21/2027",
+    "ratingDate": "09/21/2026 05:55:06 AM",
+    "riskCompany": "Nautilus Insurance Group",
+    "policyMinimumPremium": null,
+    "totalPolicyPremium": 79397.00,
+    "location1": {
+      "locationNumber": 1,
+      "address": "603 Rue Maupesant, Larue, MS, 39564",
+      "classcodeDetail": {
+        "classcode": "63010",
+        "exposure": 1000,
+        "exposureBase": "T",
+        "premRate": 79.347,
+        "prodRate": 0.000,
+        "finalRate": 79.347,
+        "classcodeMinimumPremium": null,
+        "classcodePremium": 79347.00
+      }
+    },
+    "quoteDetails": {
+      "quoteNumberCarrier": "320413101",
+      "quoteUrl": "https://onetest.nautilusagents.com/api/policy/open/320413101",
+      "website": "https://www.nautilusagents.com/",
+      "coverageHighlights": [
+        "Refer To Underwriting Guide For Applicable Deductible By Classification - 63010",
+        "Risk Characteristics question is missing. Defaulted response to 'No'.",
+        "NIC_QuoteLetterUrl (link reference)"
+      ],
+      "carrierRequestResponse": {
+        "requestXml": "not captured as a usable link in source data",
+        "responseXml": "not captured as a usable link in source data"
+      }
+    }
+  },
+  "consistencyChecks": [
+    "totalPolicyPremium === sum of every location's classcodeDetail.classcodePremium (single-location, single-classcode this pass: 79397.00 !== 79347.00 in the reference sample above — a $50.00 gap unexplained by the visible line items; flag this as an open item to clarify with the user rather than silently assume it's a fee/rounding artifact, since add-edit-risk.json's Location has no separate fee entered at data-entry time)",
+    "classcodeDetail.finalRate === classcodeDetail.premRate + classcodeDetail.prodRate",
+    "classcodeDetail.classcodePremium ≈ classcodeDetail.exposure × classcodeDetail.finalRate / 1000 (Exposure Base 'T' = thousands, consistent with add-edit-risk.json's classification.exposure of 1000 rating against a per-thousand-style rate — not independently confirmed, flagged as an open item)",
+    "Quote Option Detail page's Premium tab 'Rated Premium' and header 'Premium' both equal totalPolicyPremium after Close & Apply, per quote-option-details.md"
+  ]
+}

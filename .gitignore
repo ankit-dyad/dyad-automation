@@ -6,3 +6,4 @@ blob-report/
 .env
 .env.local
 *.log
+.DS_Store

@@ -1,0 +1,15 @@
+{
+  "environment": "customer-alis.dyadtech.com",
+  "usernameEnvVar": "ALIS_UAT_USERNAME",
+  "passwordEnvVar": "ALIS_UAT_PASSWORD",
+  "credentialNote": "Values for this pass: testqa1 / Welcome@1234 (QA sandbox credentials for customer-alis.dyadtech.com, not production data). Per knowledge/conventions.md, the literal values belong ONLY in the ALIS_UAT_USERNAME / ALIS_UAT_PASSWORD env vars (or alis/knowledge/data.json's credentials[0], which framework/utils/env.ts's getCredential() falls back to) — never hardcoded in a test file. NOTE: alis/knowledge/data.json currently still holds the OLD environment's credentials (dyadqa / Welcome@123456 for alisuat.novatae.com) and baseUrl — that file needs updating to this environment before getCredential()'s fallback path would resolve correctly for this instance.",
+  "expectedOutcome": {
+    "landingRoute": "#/followup",
+    "note": "Confirmed this pass: successful login lands on the Follow Up list. login.md does not (yet) confirm whether the post-login startup message popup seen on the old novatae.com instance also appears on this dyad-branded instance — treat as unconfirmed/open item until re-verified live, don't assume it copies over."
+  },
+  "openItems": [
+    "Exact login form field selectors/placeholders (Username vs Email, Password) not yet re-captured for this instance.",
+    "Whether a startup-message popup appears after login here (it does on the old novatae.com instance).",
+    "Full base URL path structure (whether it's customer-alis.dyadtech.com/ALIS.BMS/APP/#/login like the old instance, or different) — login.md's 'URL' field only gives the bare domain."
+  ]
+}

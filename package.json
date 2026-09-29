@@ -5,9 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:alis": "PLAYWRIGHT_BASE_URL=https://alisuat.novatae.com/ALIS.BMS/APP/ playwright test --project=alis",
-    "test:alis:login:headed": "PLAYWRIGHT_BASE_URL=https://alisuat.novatae.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/login/login.test.ts --headed",
-    "test:alis:header:headed": "PLAYWRIGHT_BASE_URL=https://alisuat.novatae.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/header/header.test.ts --headed",
+    "test:alis": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis",
+    "test:alis:login:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/login/login.test.ts --headed",
+    "test:alis:header:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/header/header.test.ts --headed",
+    "test:alis:create-submission:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/create-submission/create-submission.test.ts --headed",
+    "test:alis:add-quote:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/add-quote/add-quote.test.ts --headed",
+    "test:alis:market-selection:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/market-selection/market-selection.test.ts --headed",
+    "test:alis:add-edit-risk:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/add-edit-risk/add-edit-risk.test.ts --headed",
+    "test:alis:rate-summary:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/rate-summary/rate-summary.test.ts --headed",
+    "test:alis:quote-option-details:headed": "PLAYWRIGHT_BASE_URL=https://customer-alis.dyadtech.com/ALIS.BMS/APP/ playwright test --project=alis alis/tests/quote-option-details/quote-option-details.test.ts --headed",
     "test:nexsure": "playwright test --project=nexsure",
     "test:nexsure:login:headed": "PLAYWRIGHT_BASE_URL=https://jmiqaweb01.nexsure.com/nexui/ playwright test --project=nexsure nexsure/tests/login/login.test.ts --headed",
     "test:nexsure:create-client:headed": "PLAYWRIGHT_BASE_URL=https://jmiqaweb01.nexsure.com/nexui/ playwright test --project=nexsure nexsure/tests/create_client/createClient.test.ts --headed",
@@ -63,6 +69,7 @@
     "@playwright/mcp": "^0.0.5",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.4.1",
+    "pdf-parse": "^2.4.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

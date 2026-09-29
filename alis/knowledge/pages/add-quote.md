@@ -1,0 +1,90 @@
+Add Quote — Quote Creation (ALIS)
+
+Overview
+The "+Add Quote" flow, reached from an existing Submission's page (the "Submission" tab, next to the Insured/Agency summary panels — see `new-insured-form.md` for how a submission is created). Clicking it creates a new Quote under that submission and lands on a new Quote tab.
+
+This document covers only quote creation itself: the confirmation pop-up before Add Quote opens, the Add Quote modal, and the resulting Quote tab (its header, kebab menu, and the Edit/Quote Detail modal). What happens once you attach a market to the quote — the Market Selection screen (Markets tab and Market Assistant tab) and the resulting option row — is a separate document, `market-selection.md`, reached from this Quote tab's "+ Add Markets" / "Choose from Market Assistant" buttons.
+
+Field
+Value
+Application
+ALIS (Alis Core / Alis Custom — Dyad Tech Private Limited automation POC)
+Environment
+UAT
+Opened via
+An existing Submission's page → "+ Add Quote" button (top-left, next to the "Submission" tab)
+
+Entry point: the Acknowledgement Email pop-up
+Clicking "+ Add Quote" first opens a small dialog:
+"Please Confirm — Do you want to send out an Acknowledgement Email to the agent?" with Cancel / Ok buttons.
+
+- Clicking Cancel aborts the whole action — no Add Quote modal opens, no quote tab appears, and you're left on the plain Submission view. It is not a "skip the email but continue" option.
+- Clicking Ok shows a "Submission Saved Successfully" toast and then opens the Add Quote modal described below. The email (if actually sent) would go to the agency's contact email address shown on the Submission page (e.g. `d.thakkar@dyadtech.com` in this test data) — whether an email is truly delivered in this UAT environment was not independently confirmed.
+- Correction (confirmed 2026-09-16): this prompt is NOT reliably once-per-submission. A later pass on a different submission saw it reappear on every single "+Add Quote" click, including immediately after the Add Quote modal had been accidentally closed and reopened on the same submission (requiring Cancel/Ok to be handled again each time). Treat it as "may appear on any Add Quote click" rather than "only the first time" — the once-per-submission pattern seen in an earlier pass may have been coincidental (e.g. tied to whether the submission's own data had unsaved changes) rather than a hard rule. Always be ready to handle this dialog on every Add Quote attempt, and default to clicking Cancel unless sending the email is actually desired.
+
+The Add Quote modal
+Heading "Add Quote", with two tabs: Binding (selected by default) and Brokerage (not opened in this pass).
+
+Fields, top to bottom:
+- Coverage and COB — a side-by-side pair of type-ahead text fields (each with an "x" clear icon). Typing (tested with "Commercial Package") shows a dropdown after a short delay, formatted "(code) Name" — e.g. "(CPK) Commercial Package" — and only one match existed for that search term in this environment.
+- "OR" divider beneath the Coverage/COB pair.
+- Product — a single type-ahead field below the "OR" divider (own "x" clear icon), mutually exclusive with Coverage/COB: as soon as Coverage was set, Product visibly disabled/grayed out. Not tested with an actual Product value, so its own option list and exact behavior when used instead of Coverage/COB is unconfirmed.
+- Operation — a type-ahead-styled dropdown (own "x" clear icon) that, when clicked, shows a fixed list rather than filtering by typed text. Full list observed (14 options): Agriculture and Farming, Construction and Contracting, Education, Energy and Utilities, Financial Services, Habitational, Healthcare and Medical Services, Hospitality and Entertainment, Manufacturing, Non-Profit, Real Estate and Property Management, Retail and Wholesale, Technology, Transportation and Logistics. Left blank in this pass.
+- Filing State, Term, Proposed Effective, Proposed Expiry — a row of four fields. Filing State and Term arrive pre-filled (in this pass: "Connecticut" and "12") — presumably defaulted from the Insured's own state and the agency/product's standard term, though this wasn't isolated to confirm. Proposed Effective and Proposed Expiry default to today's date and today+Term respectively, and both render as grayed-out/read-only-looking text until clicked.
+- Close and Add Quote buttons, bottom right.
+
+Behavior / callouts
+- Pressing Escape while the modal (or its date-picker) is open closes the entire Add Quote modal immediately, discarding every field filled in — it does not just back out of a nested calendar or dropdown. Click elsewhere on the page instead if you want to close a sub-control without losing the form.
+- Clicking into Proposed Effective opens a month-calendar pop-up (with "‹ Month Year ›" navigation and a "Today : <date>" footer). Changing the month sometimes needs the target day clicked twice — the first click after navigating a month didn't always register a selection in this pass.
+- Proposed Expiry recalculates automatically from Proposed Effective + Term the moment Effective changes (confirmed: setting Effective to 08/26/2026 with Term 12 instantly updated Expiry to 08/26/2027) — it is not independently editable.
+- Correction/callout (confirmed 2026-09-16): unless a specific Effective date is actually required by the test/spec, it's simplest and safest to leave Proposed Effective/Expiry exactly as the modal defaults them (today's date / today+Term) rather than opening the calendar at all. Two reasons: (1) the calendar's double-click-to-register quirk noted above makes it easy to land on the wrong day; (2) if the calendar is opened while nested inside the Add Quote modal and you press Escape to back out of just the calendar, Escape closes the ENTIRE Add Quote modal instead (per the callout above), forcing you to reopen it and re-handle the Acknowledgement Email dialog again. Clicking elsewhere on the page (outside the calendar, inside the modal) dismisses just the calendar safely.
+- Clicking "Add Quote" both creates the quote and shows a "Quote Created Successfully" toast.
+- If a quote with the same Coverage/COB combination already exists on this submission, clicking "Add Quote" instead shows a second confirm dialog: "Please Confirm — Quote Already Available. Would you like to Create duplicate Quote?" (Cancel / Ok). Clicking Ok proceeds to actually create a second quote with the same Coverage/COB (confirmed: creating a second "Commercial Package" quote on a submission that already had one produced "CPK-BA-02" alongside the existing "CPK-BA-01"). What Cancel does here wasn't isolated (presumably backs out, leaving the Add Quote modal open).
+
+Result: the new Quote tab
+A new tab appears next to "Submission", labeled with a generated quote code (e.g. "CPK-BA-01" — built from the coverage code and authority). The submission-level status badge (top right) changes to "New Business Quote Preparation". The quote tab shows:
+- A header with the Coverage name as a title (e.g. "Commercial Package"), an Edit button, and the date range/authority/coverage summary line (e.g. "From : Aug 26, 2026 To : Aug 26, 2027 • Binding • Commercial Package").
+- A kebab (⋮) menu at the top right of this header with: Copy Quote, Advance Copy Option, Close Quote, Decline Quote, Additional Data, Mark as Lead, Expiration Letter, a "Show Unbound" toggle (on by default), and OrderBy (sortable, with a direction arrow).
+- Before any market is added: two buttons "Rate with all Possible Markets" and "Choose from Market Assistant", a green "+ Add Risk Information" button, a "Risk Information" section with its own "Add/Edit Risk" button (empty at this point), and a green "+ Add Markets" button bottom-right — all covered in `market-selection.md`, since that's where they lead. These buttons disappear once the quote has at least one market/option attached, replaced by just "+ Add Markets" in the header area.
+
+The header's Edit button opens a separate "Quote Detail" modal — distinct from the Add Quote modal — showing: Coverage (pre-filled), Class of Business (shown blank in this pass, even though "COB" had been filled in on the Add Quote modal — unclear whether these are genuinely different fields or a display/sync quirk), Authority Level (dropdown, "BINDING"), Transaction Type / Carrier Transaction Type / Agency Transaction Type (three dropdowns, all defaulted to "NBS"), Operation, an Acquired checkbox, and Close/Update buttons. Not saved/updated in this pass.
+
+Open items / to verify
+- Exactly what changes if Cancel vs Ok is chosen on the Acknowledgement Email pop-up beyond "Cancel aborts everything" — and whether Ok truly sends a live email in this UAT environment.
+- The real trigger condition for the Acknowledgement Email prompt — confirmed NOT to be a simple once-per-submission rule (see correction above), but the actual condition (unsaved submission changes? something else?) is still unconfirmed.
+- What the "Brokerage" tab (alternative to "Binding") changes in the Add Quote modal.
+- The Product field's own behavior/option list when used instead of Coverage + COB.
+- Whether "Class of Business" on the Quote Detail edit modal is really a separate field from "COB" on Add Quote, or a display/sync quirk (COB was filled but Class of Business showed blank).
+- The full option lists for Transaction Type / Carrier Transaction Type / Agency Transaction Type beyond the default "NBS".
+- What Cancel does on the "Quote Already Available. Would you like to Create duplicate Quote?" dialog (only Ok was exercised).
+
+(Element IDs/classes/selectors intentionally omitted — tracked separately.)
+
+Data used to produce this document
+Values may change in future explorations — treat these as a worked example, not a fixed convention. Against submission SUB1655627 (Insured: Zeel1 Patel, Agency: DYAD Test Agency (AGT51935)):
+- Quote CPK-BA-01: Coverage = Commercial Package, COB = Commercial Package, Filing State = Connecticut, Term = 12, Proposed Effective = 08/26/2026 (Proposed Expiry auto-set to 08/26/2027), Operation left blank.
+- Quote CPK-BA-02: a second, duplicate "Commercial Package" quote created on the same submission (via the "Quote Already Available" confirm dialog). Same Coverage/COB/Filing State/Term as CPK-BA-01; Proposed Effective/Expiry left at their today's-date defaults (09/14/2026–09/14/2027) rather than set explicitly.
+
+See `market-selection.md` for how markets/options (Market Company = Hadron Specialty Insurance Company (M-RM0164-007), Risk Co. = Hadron Specialty Insurance Company (R4970-003)) were attached to both of these quotes.
+
+A later pass (2026-09-16), against submission SUB1655785 (Insured: Jordan2 Brad, Agency: DYAD Test Agency (AGT51935)): went straight from a freshly-created Submission to "+ Add Quote" (per explicit instruction not to touch the Submission page's own fields first), handled the Acknowledgement Email dialog with Cancel, then created Quote CPK-BA-01 with Coverage = Commercial Package, COB = Commercial Package, Filing State = Connecticut, Term = 12, Proposed Effective/Proposed Expiry left untouched at the modal's own defaults (09/16/2026–09/16/2027) rather than set to any specific date. This confirms the "leave dates as default" pattern above works cleanly end-to-end when no specific date is required by the spec.
+
+Environment variant — customer-alis.dyadtech.com (v4.1.19.5)
+A pass on 2026-09-22 against a different, "dyad"-branded ALIS instance (`https://customer-alis.dyadtech.com`, v4.1.19.5 — distinct from the Novatae UAT instance the rest of this document was written against) found several differences worth flagging for anyone testing against this or a similar "dyad" instance:
+
+- New field: a "Quote Expiration Date" box now sits next to Operation, between the Coverage/COB/Product block and the Filing State/Term/Proposed Effective/Proposed Expiry row. Not exercised — left blank in this pass with no apparent ill effect.
+- COB is genuinely required in this environment, contrary to this document's earlier "open item" uncertainty: attempting "Add Quote" with COB blank produced a "Please Select COB" toast and the modal stayed open. It is not just a display/sync quirk with "Class of Business" as speculated above — it blocks quote creation outright here.
+- COB's own type-ahead options are scoped to whichever Coverage is selected, and are NOT matched by typing the coverage's own name. With Coverage = "(COMPKG) COMMERCIAL PACKAGE" selected, typing "Commercial Package" or "CPK" into COB produced no suggestions at all; only focusing the empty COB field (or typing text that matches the COB option's own label, e.g. "PACK") surfaced its real options — in this pass, "(COB106) ARTISAN CONTRACTOR" and "(COB105) PACKAGE". Selected "(COB105) PACKAGE" as the closest match to "Commercial Package". If a COB type-ahead appears to return nothing, clear the field and focus it empty to see the full option list rather than assuming there's no data.
+- As in the New Insured form on this same instance (see `new-insured-form.md`'s environment-variant note), clicking a type-ahead suggestion with the mouse did not reliably register here either — selecting via keyboard (Down arrow, then Return) was the reliable method for both Coverage and COB.
+- The resulting quote code reflects the Coverage's own short code rather than a fixed "CPK" prefix: with Coverage "(COMPKG) COMMERCIAL PACKAGE" selected, the created quote was named "COMPKG-BA-01", not "CPK-BA-01" as seen on the Novatae instance (whose Commercial Package coverage code is apparently "CPK" there vs. "COMPKG" here — these are evidently two independently-configured environments, not just different data in the same app).
+- The Acknowledgement Email confirmation dialog's inconsistency (documented above) was reconfirmed: it appeared on the first "+ Add Quote" click on a fresh submission, but did not reappear on an immediate second "+ Add Quote" click in the same session after the first attempt was cancelled.
+- Coverage = Commercial Package, COB = Package, Filing State and Term arrived pre-filled (Connecticut / 12) exactly as documented above; Proposed Effective/Expiry defaulted to today's date/today+Term (09/22/2026–09/22/2027) and were left untouched.
+
+Further findings, same instance (confirmed 2026-09-22, Commercial General Liability quote)
+- COB's type-ahead can return more than one closely-named match for the same search term — typing "Artisan" surfaced both "(COB106) ARTISAN CONTRACTOR" and "(WART) WW - ARTISAN CONTRACTORS". These are genuinely different COB codes, not duplicates of the same record — read the full label (including the code) before picking one; "(COB106) ARTISAN CONTRACTOR" was selected as the closest literal match to a spec value of "Artisan Contractor".
+- Refinement to the keyboard-selection guidance above (2026-09-23): keyboard Down+Return is reliable for COB only when the search produces a single suggestion — confirmed working for a Coverage search with one match. When COB is searched with the field empty/focused (surfacing its full multi-entry option list) or another multi-match search, Down+Return unreliably lands on the wrong item (confirmed: selected "(BOND) BOND" instead of the intended "(COB106) ARTISAN CONTRACTOR"). The reliable fix is the same as documented in `testing-process-notes.md` Rule 6: clear the field, retype/refocus, and click the correct suggestion directly with the mouse rather than using the keyboard when more than one suggestion is showing.
+- Proposed Effective/Proposed Expiry on this modal are subject to the same past-date restriction documented in `new-insured-form.md`: the calendar disables any date before today, so a spec date that has already passed cannot be set. Left at the modal's own default (today's date, term-calculated expiry) — confirmed acceptable per explicit user instruction, same as the Submission-level date fields.
+- A "Please Confirm" dialog can appear on Save/Create actions (observed both when creating the submission and again at the quote/option level) when the risk's Filing State differs from the Agency's own licensed states. At the submission level it can contain up to three independent checkboxes — "Confirm All", "Not licensed to work in this State. Do you want to proceed?", and "Do you want to send confirmation mail to producer? Click Ok to send." — each toggled separately; leaving the email checkbox unchecked and clicking Ok still proceeds with the save without sending that email. At the quote/option level (e.g. after Add Quote or Create Option — see `market-selection.md`), only the single "Not licensed..." question appears, with no email checkbox. Per explicit user instruction, once no email-sending checkbox is present, just check whatever proceed/license checkbox is shown and click Ok directly — no further per-checkbox judgment is needed at that level.
+
+Correction — on this instance, Cancel on the Acknowledgement Email dialog does NOT always abort the whole "+ Add Quote" action (2026-09-23, submission SUB000862)
+This document's Overview section states, based on the Novatae-instance pass it was originally written against, that clicking Cancel on "Do you want to send out an Acknowledgement Email to the agent?" aborts the whole action with no Add Quote modal opening. A later pass on this "dyad" instance (`customer-alis.dyadtech.com`) found this does not always hold here: clicking Cancel on a brand-new submission still proceeded to open the Add Quote modal normally, rather than backing out entirely. Combined with the inconsistency already documented above (the dialog not reliably reappearing on every Add Quote click), treat this dialog's Cancel behavior as genuinely inconsistent on this instance — don't assume Cancel is a safe, guaranteed abort here the way the Novatae-instance documentation describes. If the Add Quote modal is not desired at all, verify the actual page state after clicking Cancel rather than assuming the action was aborted.

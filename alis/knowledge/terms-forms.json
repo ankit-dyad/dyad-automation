@@ -1,0 +1,139 @@
+{
+  "premiumAdjustment": {
+    "triaTypeValue": "3",
+    "grossCommOption": "GLOBAL DEFAULT",
+    "agentCommOption": "Special Agency Commission"
+  },
+  "missingValues": {
+    "minimumEarnedPremiumDollar": "525.5",
+    "minimumEarnedPremiumPercentage": "13"
+  },
+  "initialFormsCount": 38,
+  "initialFormsCountNote": "Confirmed across multiple independent passes in testing-process-notes.md and quote-option-details.md for this classcode/COB/carrier combination — treated as a strong prior, not a one-off, but still not a fixed constant per this project's own standing caution (carrier form libraries change over time).",
+  "expectedFinalCountThisPass": 28,
+  "expectedFinalCountThisPassNote": "10 forms (CG 00 70, E001, L210, L217, L380, L501, L601, S150, S902, E602FL) out of the 10 candidate shouldBeRemoved forms are present on this pass for this classcode/carrier/filing state combination — deleting these 10 present forms yields 38 - 10 = 28 remaining forms.",
+  "targetCountRule": "The target Forms count is exactly the 'should be present' reference list's own item count (28 in every pass documented so far for this classcode/COB combination) — not merely 'delete the should-be-removed list and stop'. After bulk-deleting every present should-be-removed form, count what's left: if it's more than 28, at least one extra auto-attached form (typically a state-specific cancellation/nonrenewal form tied to the risk's filing state, e.g. IL 02 60 for Connecticut, IL 02 82 for Mississippi) must also be identified and deleted. See testing-process-notes.md Rule 8 and quote-option-details.md's 'CORRECTION' section.",
+  "shouldBeRemoved": {
+    "note": "The full 10-item reference list, form codes as given/confirmed across this project's prior passes.",
+    "forms": [
+      {
+        "formNo": "CG 00 70",
+        "formName": "EXCLUSION - WAR",
+        "version": "Jan-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "E001",
+        "formName": "Nautilus Insurance Company Common Policy Declarations",
+        "version": "Apr-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "L210",
+        "formName": "Exclusion - All Assault or Battery",
+        "version": "Feb-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "L217",
+        "formName": "Exclusion - Punitive, Exemplary, Multiplied or Uninsurable Damages (Including Fines, Penalties or Sanctions)",
+        "version": "Feb-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "L380",
+        "formName": "Exclusion - Cyber Incident",
+        "version": "Feb-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "L501",
+        "formName": "Perfluoroalkyl and Polyfluoroalkyl Substances (PFAS) Exclusion",
+        "version": "Mar-25",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "L601",
+        "formName": "Amendment of Conditions - Premium Audit",
+        "version": "Nov-25",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "S150",
+        "formName": "Commercial General Liability Coverage Part Declarations",
+        "version": "Feb-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "S902",
+        "formName": "Schedule of Forms and Endorsements",
+        "version": "Apr-26",
+        "expectedThisPass": "present"
+      },
+      {
+        "formNo": "E602FL",
+        "formName": "Florida Changes - Cancellation and Nonrenewal",
+        "version": "May-24",
+        "expectedThisPass": "present"
+      }
+    ]
+  },
+  "shouldBePresent": {
+    "count": 28,
+    "forms": [
+      { "formNo": "L367", "formName": "Exclusion - Trampolines" },
+      { "formNo": "L369", "formName": "Exclusion - Communicable or Infectious Disease" },
+      { "formNo": "L378", "formName": "Exclusion - Swimming Pools" },
+      { "formNo": "L408", "formName": "Changes - Civil Union Or Domestic Partnership" },
+      { "formNo": "L502", "formName": "Exclusion - Biometric Information" },
+      { "formNo": "L503", "formName": "Limitation of Coverage to Designated Premises" },
+      { "formNo": "L508", "formName": "Exclusion - Human Trafficking" },
+      { "formNo": "L850", "formName": "Deductible Liability Insurance (Including Supplementary Payments)" },
+      { "formNo": "S038", "formName": "Amendment of Liquor Liability Exclusion" },
+      { "formNo": "S261", "formName": "Exclusion - Asbestos" },
+      { "formNo": "E609", "formName": "Economic or Trade Sanctions Endorsement" },
+      { "formNo": "E915", "formName": "U.S. Treasury Department's Office of Foreign Assets Control (OFAC) Advisory Notice to Policyholders" },
+      { "formNo": "IL0017", "formName": "Common Policy Conditions" },
+      { "formNo": "E906", "formName": "Service of Suit" },
+      { "formNo": "E001J", "formName": "Nautilus Insurance Company Commercial Lines Policy Jacket" },
+      { "formNo": "S013", "formName": "Minimum Earned Premium Endorsement" },
+      { "formNo": "CG0001", "formName": "CGL COVERAGE FORM" },
+      { "formNo": "CG2147", "formName": "Employment-Related Practices Exclusion" },
+      { "formNo": "CG2173", "formName": "EXCLUSION OF CERTIFIED ACTS OF TERRORISM" },
+      { "formNo": "CG2196", "formName": "SILICA OR SILICA-RELATED DUST EXCLUSION" },
+      { "formNo": "IL0021", "formName": "Nuclear Energy Liab Excl Endt" },
+      { "formNo": "E919", "formName": "Privacy Notice" },
+      { "formNo": "L216", "formName": "Amendment of Definitions - Insured Contract (Limited Form)" },
+      { "formNo": "L223", "formName": "Total Exclusion - Pollution" },
+      { "formNo": "L238", "formName": "Exclusion - Toxic Metals" },
+      { "formNo": "L241", "formName": "Excl-Micro/Bio Organisms/Contam" },
+      { "formNo": "L333", "formName": "Exclusion - Animals" }
+    ]
+  },
+  "extraAutoAttachedForms": {
+    "note": "State-specific cancellation/nonrenewal forms seen beyond the should-be-removed/should-be-present lists in prior passes, tied to filing state. This pass's filing state is Florida (Add Quote) / Mississippi (Create Submission) — those two differ in the source data, so which state's auto-attached extra form (if any) actually shows up here is unconfirmed until run live.",
+    "observedPattern": [
+      {
+        "state": "Connecticut",
+        "formNo": "IL 02 60",
+        "formName": "CONNECTICUT CHANGES-CANCELLATION AND NONRENEWAL"
+      },
+      {
+        "state": "Mississippi",
+        "formNo": "IL 02 82",
+        "formName": "MISSISSIPPI CHANGES - CANCELLATION AND NONRENEWAL"
+      }
+    ]
+  },
+  "deletionWorkflow": {
+    "steps": [
+      "Tick the Delete checkbox for every present should-be-removed form (multi-select).",
+      "Re-scroll the ENTIRE grid one more time (small steps or keyboard Home/End after focusing a row — mouse-wheel scroll is known to get stuck partway, see testing-process-notes.md Rule 10) and visually re-verify every ticked row is one that was actually intended — clicking anywhere on a row's body (not just its checkbox) silently toggles that row's own Delete checkbox, a confirmed, repeat-offending trap.",
+      "Click the red 'Delete Form' button (top of grid, not per-row).",
+      "Confirm the 'Please Confirm' dialog (Ok) — wait for it to fully render before clicking.",
+      "Re-check the 'Forms [Count: N]' heading. If N > 28, identify the extra unflagged form(s) (cross-check against shouldBePresent once that list is provided, or use the Review Policy → 'Missing Forms' tab as a secondary signal) and repeat the tick/verify/delete steps for it/them.",
+      "Click the page-level 'Save' button once the count reads exactly 28."
+    ],
+    "recoveryIfOverDeleted": "If a form is accidentally deleted (count ends up below 28): 'Add More Forms' button → Advanced Filter → Form Code 'Contains' → the exact code → Search → tick its row → 'Add To Quote' (not 'Save' — no button is literally labeled Save in that modal). The re-added form is appended as the LAST row rather than reinserted at its original position — cosmetic only, doesn't affect the Forms count or the Policy Generation PDF's Schedule of Forms. Full detail in testing-process-notes.md Rule 10."
+  }
+}
