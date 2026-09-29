@@ -6,15 +6,15 @@
     { "name": "UAT", "baseUrlEnvVar": "ALIS_UAT_BASE_URL" }
   ],
   "activeBaseUrlEnvVar": "ALIS_UAT_BASE_URL",
-  "baseUrl": "https://alisuat.novatae.com/ALIS.BMS/APP/#/login",
+  "baseUrl": "https://customer-alis.dyadtech.com/ALIS.BMS/APP/#/login",
   "framework": "Angular SPA (hash-based routing, #/login)",
-  "appVersion": "4.1.12.121",
-  "appVersionDate": "2025-05-11",
+  "appVersion": "4.1.19.5",
+  "appVersionDate": "2026-07-03",
   "credentials": [
     {
-      "username": "dyadqa",
-      "password": "Welcome@123456",
-      "note": "UAT-only test credentials, mirrored from pages/login.md. Not gitignored — see conventions.md's rule against committing credentials before this is pushed."
+      "username": "testqa1",
+      "password": "Welcome@1234",
+      "note": "QA sandbox credentials for customer-alis.dyadtech.com — confirmed unchanged and working as of 2026-09-24. Mirrored from pages/login.md. Not gitignored — see conventions.md's rule against committing credentials before this is pushed."
     }
   ],
   "loginFlow": {
@@ -22,26 +22,40 @@
     "confirmed": true,
     "steps": [
       "Navigate to ALIS_UAT_BASE_URL#/login",
-      "Fill #txtUserName with ALIS_UAT_USERNAME",
-      "Fill #txtPassword with ALIS_UAT_PASSWORD",
-      "Click button[type=submit]:has-text(\"Log In\")"
+      "Fill User Name field (page.getByPlaceholder('User Name')) with ALIS_UAT_USERNAME",
+      "Fill Password field (page.getByPlaceholder('Password')) with ALIS_UAT_PASSWORD",
+      "Click Log In button (page.getByRole('button', { name: 'Log In' }))"
     ],
     "postLogin": {
       "landingRoute": "#/followup",
       "popup": {
-        "present": true,
-        "selector": "getByRole('dialog')",
-        "closeButtonSelector": "getByRole('dialog').getByRole('button', { name: 'Close' })",
-        "note": "A startup message modal (<lib-startup-message>, tabs 'Visit Notes'/'Message') opens on every successful login in UAT. Confirmed 2026-09-10."
+        "present": false,
+        "note": "No startup-message popup observed on this instance (confirmed 2026-09-24, fresh login) — unlike the legacy novatae.com environment below, where one reliably appeared. login.page.ts's closeStartupMessagePopupIfPresent() handles both cases defensively rather than assuming either."
       }
     }
   },
   "primaryNavigation": [],
   "openItems": [
     "Validation/error message behavior for invalid credentials (selector + text) — not yet captured.",
-    "Exact accessible name/selector for the 'Open Resource Center' button.",
     "Whether 'Forgot Password?' leads to a page worth documenting separately.",
-    "Whether the post-login startup message popup can ever be suppressed (e.g. a 'don't show again' setting) — not yet known."
+    "Session timeout behavior — not yet known.",
+    "Whether MFA/2FA is configured for this account/environment — not yet known."
   ],
-  "lastVerified": "2026-09-10"
+  "lastVerified": "2026-09-24",
+  "legacyEnvironments": [
+    {
+      "name": "UAT (novatae.com) — superseded, kept for reference only",
+      "baseUrl": "https://alisuat.novatae.com/ALIS.BMS/APP/#/login",
+      "appVersion": "4.1.12.121",
+      "appVersionDate": "2025-05-11",
+      "credentials": { "username": "dyadqa", "password": "Welcome@123456" },
+      "postLoginPopup": {
+        "present": true,
+        "selector": "getByRole('dialog')",
+        "closeButtonSelector": "getByRole('dialog').getByRole('button', { name: 'Close' })",
+        "note": "A startup message modal (<lib-startup-message>, tabs 'Visit Notes'/'Message') opened on every successful login here. Confirmed 2026-09-10."
+      },
+      "note": "This is a separate, independently-configured ALIS instance from the one the project has actually been testing against since — do not assume credentials, agency data, or UI behavior carry over. Kept here only so the earlier exploration pass isn't silently lost; the fields above (baseUrl, credentials, appVersion, etc.) are all the CURRENT active dyadtech.com environment now."
+    }
+  ]
 }
