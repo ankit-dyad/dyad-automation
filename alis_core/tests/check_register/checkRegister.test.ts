@@ -190,5 +190,48 @@ test(
       'Opened the Columns side panel and confirmed ag-Grid\'s column-configuration tool panel rendered.',
       { label: 'Columns side tab', locator: checkRegisterPage.columnsSideTabLocator },
     );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Export the first row as PDF, if a row is present',
+      async () => {
+        // Guarded rather than assumed: the Batch No search step above is
+        // tolerant of a known data race and can leave the grid at 0 rows
+        // (see that step's own comment) - a no-op here, not a test.skip(),
+        // since a genuinely empty grid is this environment's own state, not
+        // a code regression, and skipping would also skip the Excel export
+        // step below it.
+        const hasRow = await checkRegisterPage.firstRowPdfExportIconLocator
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!hasRow) {
+          return { hasRow, filename: null as string | null };
+        }
+        const download = await checkRegisterPage.clickFirstRowPdfExport();
+        expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
+        return { hasRow, filename: download.suggestedFilename() };
+      },
+      ({ hasRow, filename }) =>
+        hasRow
+          ? `Clicked the first row's PDF Export icon and downloaded "${filename}" as a PDF - a genuine file (blob URL), unlike Batch List's own PDF Export action (a JSON-response trick, no real download).`
+          : 'No row was present to export as PDF - this step was a no-op.',
+      { label: 'PDF Export icon (first row)', locator: checkRegisterPage.firstRowPdfExportIconLocator },
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Export the current filtered grid to Excel',
+      async () => {
+        const download = await checkRegisterPage.clickExportToExcel();
+        expect(download.suggestedFilename()).toMatch(/\.xlsx$/i);
+        return download.suggestedFilename();
+      },
+      (filename) =>
+        `Clicked Export to Excel and downloaded "${filename}" - the current filtered grid's data as a genuine .xlsx file (this button doesn't depend on any specific row being present, unlike PDF Export above).`,
+      { label: 'Export to Excel button', locator: checkRegisterPage.exportToExcelButtonLocator },
+    );
   },
 );

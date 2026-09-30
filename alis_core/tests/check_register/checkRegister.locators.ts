@@ -125,8 +125,21 @@ export class CheckRegisterLocators {
     return this.pane.locator('button[type=submit]:has-text("Search")');
   }
 
+  /** Confirmed live 2026-09-29: a genuine file download (blob URL), not a
+   * response-inspection trick - filename observed as
+   * "CheckRegister_<fromDate>_To_<toDate>.xlsx". */
   get exportToExcelButton() {
     return this.pane.locator('button:has-text("Excel")');
+  }
+
+  /** Per-row PDF export icon, pinned-right action column - sits alongside
+   * View Batch Data (col-id 0) and Check Summary (col-id 2) at col-id 1, per
+   * check-summary-popup.md's Selectors table. Confirmed live 2026-09-29: a
+   * genuine file download (blob URL, filename "BatchDetail.pdf"), unlike
+   * Batch List's own PDF Export icon (a JSON-response trick, no real
+   * download) - don't assume the two behave the same way. */
+  get firstRowPdfExportIcon() {
+    return this.pane.locator('.ag-pinned-right-cols-container i[title="PDF Export"]').first();
   }
 
   get approveButton() {

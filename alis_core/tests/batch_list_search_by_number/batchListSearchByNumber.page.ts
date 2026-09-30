@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { BatchListSearchByNumberLocators } from './batchListSearchByNumber.locators';
@@ -73,6 +73,20 @@ export class BatchListSearchByNumberPage extends BasePage {
   async clearBatchNoFilter(): Promise<void> {
     await this.enter(this.locators.batchNoSearchInput, '');
     await this.click(this.locators.selectAllCheckbox);
+  }
+
+  /** Scrolls the grid all the way down - same recipe as
+   * batchListVerification.page.ts's scrollGridToBottom(): a direct
+   * scrollTop assignment plus a dispatched scroll event works for this
+   * grid's vertical axis. Needed after clearBatchNoFilter() restores the
+   * full, unfiltered, ascending-sorted grid, since a freshly-created batch
+   * (always the highest, and therefore last, batch number) isn't in the DOM
+   * (ag-Grid row virtualization) until scrolled into view. */
+  async scrollGridToBottom(): Promise<void> {
+    await this.locators.verticalViewport.evaluate((viewport) => {
+      viewport.scrollTop = viewport.scrollHeight;
+      viewport.dispatchEvent(new Event('scroll'));
+    });
   }
 
   // ---------------------------------------------------------------------

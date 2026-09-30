@@ -1,4 +1,4 @@
----
+﻿---
 product: alis_core
 journey: payment-upload-to-remittance
 pages: [login, payment-upload, agency-bank-setup, payment-upload-file-validation, payment-batch-list, invoice-application, batch-transaction-detail-popup, payment-tab-individual-records, payment-batch-list-pdf-export, ach-eft-check, check-register, check-summary-popup, remittance-advice]
@@ -28,9 +28,9 @@ pages: [login, payment-upload, agency-bank-setup, payment-upload-file-validation
    Batch No.
 9. Invoice Application — open it again for the first batch's first payment
    record and exercise its full filter set: confirm the Client field is
-   pre-filled and disabled, Quick Search, the Based On dropdown switch
-   (Acct Eff Date -> Due Date), and the Billing Method multiselect
-   (Select All). Close without saving.
+    pre-filled and disabled, Quick Search, the Based On dropdown switch
+    (Acct Eff Date -> Due Date -> Invoice Date), and the Billing Method
+    multiselect (Select All). Close without saving.
 10. Payment tab — open the first batch's individual payment records grid and
     confirm its columns are populated: the leftmost columns without
     scrolling, then the remaining columns after a real horizontal scroll
@@ -48,13 +48,18 @@ pages: [login, payment-upload, agency-bank-setup, payment-upload-file-validation
 14. ACH/EFT & Check — if a row is present, search the grid by that row's own
     Batch No and confirm it narrows to exactly 1 match; a no-op (not a test
     skip) if the grid is empty.
-15. Check Register — narrow the Client Type filter to Agency only, then, if
+15. Check Register - narrow the Client Type filter to Agency only, then, if
     a row remains, search by that row's own Batch No and confirm it narrows
-    to exactly 1 match; a no-op if none remain.
-16. Check Register — if a row with a Check Summary icon is present, open and
+    to exactly 1 match (tolerant of a known environment data race - see
+    check-register.md's Edge Cases); a no-op if none remain. Then opens the
+    Banks multiselect, unchecks Payment Type's Cash option, and opens the
+    Columns side panel, then exports the first row as PDF (a no-op if no
+    row is present) and exports the current filtered grid to Excel (both
+    genuine file downloads).
+16. Check Register - if a row with a Check Summary icon is present, open and
     close its Check Summary popup, confirming Client Code and Payee Name are
     populated; a no-op if none is present.
-17. Check Register — if a row is present, select it and download its
+17. Check Register - if a row is present, select it and download its
     Remittance Advice as a PDF via the "Download As" menu; a no-op if none
     is present.
 
@@ -92,4 +97,13 @@ successful run freezes the same 11 AGT003 invoices in the new batch until
 it's deleted or posted, so a re-run against unmodified state will stop at the
 "12 rows in Valid Invoice" assertion. Needs its own explicit confirmation
 before each live run, same as every other real-write spec in this suite.
+
+Steps 15-17 were briefly commented out (2026-09-28) at the user's request,
+then reinstated and merged with every other individually-automated scenario
+(2026-09-29) per a later, explicit instruction to compose the full checklist
+into one end-to-end test - that later instruction supersedes the earlier one.
+Step 15 was also refreshed to match check_register.test.ts's current, fuller
+coverage (Banks/Payment Type/Columns, not just Client Type + Search by Batch
+No), and step 9's Based On coverage now includes Invoice Date alongside Due
+Date.
 -->

@@ -1,4 +1,4 @@
-# Payment — Batch List (Batch List tab)
+﻿# Payment — Batch List (Batch List tab)
 
 ## Overview
 
@@ -57,8 +57,20 @@ wheel/scroll event):
 - **Add/Edit** (`col-id="0"`) — icon-only column (pencil glyph). Function name
   comes from the column header text, not a tooltip; exact behavior not
   exercised in this pass.
-- **Batch Edit** (`col-id="1"`) — icon-only column (pencil-in-box glyph). Same
-  caveat.
+- **Batch Edit** (`col-id="1"`) - icon-only column (pencil-in-box glyph).
+  Clicking it fires two API calls - `GetCostCenterByEntity` (returns `[]`,
+  empty, on this environment) and `GetBankList` (returns real bank data) -
+  confirmed live 2026-09-30 via network trace - but **no modal or form ever
+  appears**, no console error/warning fires, and the page/URL don't
+  change. This looks like a genuine environment limitation: the edit
+  form likely guards on a non-empty Cost Center list before rendering,
+  and this environment has none configured (consistent with Cost Center
+  also being absent from the Payment Upload tab - see payment-upload.md).
+  Investigated three separate ways (clicking the bare `<i>`, clicking the
+  cell wrapper, and confirming the row's own select-checkbox is disabled
+  so pre-selection isn't the cause) - not yet reproducible on this
+  environment. The PDF's "Edit Batch Detail" test scenario is therefore
+  currently blocked here, not merely unautomated.
 - **View** (`col-id="2"`) — icon-only column (eye glyph). Opens a "View Batch
   Data" popup — see `batch-transaction-detail-popup.md`.
 - **PDF** (`col-id="3"`) — icon-only column (red PDF-document glyph),
@@ -72,9 +84,27 @@ wheel/scroll event):
   and no dialog appeared). See `payment-batch-list-pdf-export.md` for the
   automated coverage of this — waits on that specific network response
   rather than trying to inspect a real downloaded file on disk.
-- **Del** (`col-id="4"`) — icon-only column (trash-can glyph). Known from
-  prior manual testing to delete the batch after a confirm dialog — **not**
-  exercised (real, destructive write).
+- **Del** (`col-id="4"`) - icon-only column (trash-can glyph, no `title`
+  attribute, rightmost pinned-right column, same row-duplication caveat as
+  the other action columns). Clicking it opens a plain Bootstrap confirm
+  modal (`.modal.show`, same shape as this app's other popups): title
+  **"Please Confirm"**, body text **"Are you sure you want to delete this
+  payment batch ?"**, an outlined **Cancel** button and a maroon primary
+  **Ok** button - confirmed live 2026-09-30 via the user's own manual click
+  (screenshot). Clicking Del also visually checks/highlights that row's own
+  select-checkbox (previously seen as `disabled` when inspected directly -
+  this suggests it's set programmatically to indicate the delete target,
+  not independently clickable by a user/automation). Clicking **Ok**
+  performs the delete for real - confirmed directly by the user
+  2026-09-30 via two live screenshots: the row disappears from the grid,
+  and a green success toast appears reading **"<BatchNo>" / "Batch Deleted
+  Successfully"** (with a checkmark icon) - e.g. "35094" / "Batch Deleted
+  Successfully" for batch #35094. This is a real, destructive write; see
+  business-rules.md's frozen-invoice rule for why deleting a batch matters
+  (it's the only confirmed way to unfreeze that batch's invoices). Still
+  not automated - this session's sandbox blocked scripting the click
+  itself (2026-09-30); everything above is documented from the user's own
+  manual run, not from automation.
 
 **Right-edge vertical tabs** (rotated text, along the grid's right border):
 - **Columns** — opens a column-configuration panel (seen in prior manual

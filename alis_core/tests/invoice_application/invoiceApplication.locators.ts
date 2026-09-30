@@ -32,9 +32,20 @@ export class InvoiceApplicationLocators {
    * first" (this environment's data changes over time — see
    * payment-batch-list.md's "Notable behavior"). Scoping under this wrapper
    * (rather than the whole pane) avoids accidentally matching the grid's own
-   * "Batch No" column header, which has the same visible text. */
+   * "Batch No" column header, which has the same visible text.
+   *
+   * `:visible`-scoped - confirmed live 2026-09-30: this grid mounts **two**
+   * `.ag-tool-panel-wrapper` elements at once (one for Columns, one for
+   * Filters - same "both tabs mounted at once" pattern documented elsewhere
+   * in this app), only one of which is actually visible depending on which
+   * side-tab is active. Without `:visible`, which of the two a bare
+   * unscoped match resolves to isn't guaranteed, and scoping every
+   * downstream locator (batchNoGroupHeader, batchNoSearchInput,
+   * selectAllCheckbox) under the wrong one silently finds nothing - the root
+   * cause of a bug reproduced 5 times in e2eFullFlowWithSavePayment.test.ts
+   * before being isolated with a dedicated read-only exploration script. */
   get filterToolPanel() {
-    return this.batchListPane.locator('.ag-tool-panel-wrapper');
+    return this.batchListPane.locator('.ag-tool-panel-wrapper:visible');
   }
 
   get filtersTab() {
@@ -73,6 +84,15 @@ export class InvoiceApplicationLocators {
    * here are scoped narrowly to what this feature needs. */
   get firstPaymentRecordAddInvoiceIcon() {
     return this.page.locator('.ag-pinned-right-cols-container .ag-row i[title="Add Invoice"]').first();
+  }
+
+  /** The Payment tab's own first record's Payment Amt cell - read this
+   * BEFORE opening Invoice Application, so a test can later correlate it
+   * against the outstanding invoice grid's `current_payment` column (see
+   * invoiceGridCell() below) to find which specific invoice this record
+   * was auto-applied against by Save Payment. */
+  get paymentTabFirstRecordAmount() {
+    return this.page.locator('#pills-payment .ag-center-cols-container [col-id="payment_amt"]').first();
   }
 
   /** Several `.modal` elements are mounted in the DOM at once; only the
@@ -184,5 +204,18 @@ export class InvoiceApplicationLocators {
 
   get invoiceGridRows() {
     return this.openModal.locator('.ag-center-cols-container .ag-row');
+  }
+
+  /** A specific column across every row of the outstanding invoice grid -
+   * confirmed live 2026-09-30: `col-id`s include `invoice_code`,
+   * `total_amt`, `due_amt`, `current_payment`, `writeoff_amt`,
+   * `revise_due`, `unposted_amt`. Save Payment auto-applies a payment
+   * record against its matching invoice code immediately on batch
+   * creation - this grid already reflects that applied state (Current
+   * Payment / Revise Due) without ever needing to click Save here. Use
+   * `.nth(i)` to align with a specific row found via another column.
+   */
+  invoiceGridCell(colId: string) {
+    return this.invoiceGridRows.locator(`[col-id="${colId}"]`);
   }
 }

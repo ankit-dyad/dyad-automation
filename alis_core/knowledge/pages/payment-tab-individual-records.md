@@ -1,4 +1,4 @@
-# Payment Tab — Individual Payment Records
+﻿# Payment Tab — Individual Payment Records
 
 ## Overview
 
@@ -89,8 +89,20 @@ DOM-order/col-id numbering differs from the center columns):
   `i[title="Add Invoice"]` (exact match, no trailing-space quirk here —
   confirmed via live DOM, unlike the Batch List row's own
   "Transaction Add/Edit" icon). Opens `invoice-application.md`'s modal.
-- **Edit** (`col-id="4"`) — pencil icon, `i[title="Edit Transaction"]`. Not
-  exercised in this pass (opens the record for editing — presumed write
+- **Edit** (`col-id="4"`) - pencil icon, `i[title="Edit Transaction"]`.
+  Clicking it produces **no observable effect** - confirmed live
+  2026-09-30: no modal/form appears, no `.modal` gains `.show`, no new
+  network request fires, no console error/warning, URL unchanged. A
+  pre-existing, unrelated background 403 on `ALIS.GridPreference`
+  endpoints (this account appears to lack grid-preference rights
+  generally) was ruled out as the cause - it fires on every page load,
+  before this click too. The most consistent explanation across this and
+  `payment-batch-list.md`'s Batch Edit (col-id="1", same silent-no-op
+  symptom) is that the `qable1` standard-agent role lacks edit rights for
+  these actions, and the UI simply no-ops client-side rather than
+  erroring. The PDF's "Edit Payment Details" test scenario is therefore
+  currently blocked here (account/environment limitation), not merely
+  unautomated - presumed write surface, unconfirmed on this account.
   surface).
 - **View** (`col-id="5"`) — eye icon, `i[title="View Payment data"]`,
   `data-bs-toggle="modal" data-bs-target="#modalPaymentdet..."` (truncated

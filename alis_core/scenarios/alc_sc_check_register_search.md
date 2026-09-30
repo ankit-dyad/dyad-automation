@@ -22,6 +22,11 @@ pages: [login, check-register]
    confirm the change survives reopening the panel.
 9. Open the Columns side tab and confirm ag-Grid's column-configuration tool
    panel renders.
+10. Export the first row as PDF via its pinned-right PDF Export icon (a
+    genuine file download, not a JSON-response trick like Batch List's own
+    PDF Export) - a no-op if no row is present.
+11. Export the current filtered grid to Excel via the Excel button (also a
+    genuine file download).
 
 <!--
 Source: "ALIS Accounting - Bulk Payment Upload to Remittance - End-to-End Test
@@ -31,13 +36,14 @@ No). Reached directly via the Accounting left nav rather than the
 ChocoBox/hamburger menu path described in the PDF, for the same reliability
 reason noted in alis_core/knowledge/pages/payment-upload.md.
 
-Does not exercise Approve, Print Check, or Remittance Download As — all real
+Does not exercise Approve, Print Check, or Remittance Download As - all real
 writes/downloads against this production-looking environment (see
 payment-batch-list.md's "Create Batch performs a real write" note). Does not
 exercise the Acct Eff. Date range picker (fragile `app-date-picker`, not yet
-characterized in this app). The row-level View/PDF/Check Summary actions are
+characterized in this app). The row-level View / Check Summary actions are
 covered by their own scenarios (batch-transaction-detail-popup,
-check-summary-popup).
+check-summary-popup) - PDF Export (step 10) is this screen's own row-level
+action, distinct from those two and from Batch List's own PDF Export.
 
 Step 6's assertion is intentionally tolerant, not a hard failure, for a known
 race confirmed live 2026-09-29 (see check-register.md's Edge Cases/

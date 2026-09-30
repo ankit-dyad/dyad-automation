@@ -144,6 +144,10 @@ export class InvoiceApplicationPage extends BasePage {
     return this.locators.batchListGridRows;
   }
 
+  get paymentTabFirstRecordAmountLocator() {
+    return this.locators.paymentTabFirstRecordAmount;
+  }
+
   get openModalLocator() {
     return this.locators.openModal;
   }
@@ -190,5 +194,9 @@ export class InvoiceApplicationPage extends BasePage {
 
   get invoiceGridRowsLocator() {
     return this.locators.invoiceGridRows;
+  }
+
+  invoiceGridCellLocator(colId: string) {
+    return this.locators.invoiceGridCell(colId);
   }
 }

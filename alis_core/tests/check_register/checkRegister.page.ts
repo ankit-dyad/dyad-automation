@@ -117,6 +117,24 @@ export class CheckRegisterPage extends BasePage {
     return this.locators.gridRows.count();
   }
 
+  /** Clicks Export to Excel and returns the resulting Download - a genuine
+   * file (blob URL), not a response-inspection trick (confirmed live
+   * 2026-09-29). */
+  async clickExportToExcel(): Promise<import('@playwright/test').Download> {
+    const download = this.page.waitForEvent('download');
+    await this.click(this.locators.exportToExcelButton);
+    return download;
+  }
+
+  /** Clicks the first row's PDF Export icon and returns the resulting
+   * Download - a genuine file (blob URL, "BatchDetail.pdf"), unlike Batch
+   * List's own PDF Export icon (confirmed live 2026-09-29). */
+  async clickFirstRowPdfExport(): Promise<import('@playwright/test').Download> {
+    const download = this.page.waitForEvent('download');
+    await this.click(this.locators.firstRowPdfExportIcon);
+    return download;
+  }
+
   // ---------------------------------------------------------------------
   // Exposed for the spec to assert on — assertions belong in the test, not
   // here.
@@ -160,6 +178,10 @@ export class CheckRegisterPage extends BasePage {
 
   get exportToExcelButtonLocator() {
     return this.locators.exportToExcelButton;
+  }
+
+  get firstRowPdfExportIconLocator() {
+    return this.locators.firstRowPdfExportIcon;
   }
 
   get approveButtonLocator() {
