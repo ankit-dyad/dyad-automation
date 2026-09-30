@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { CheckSummaryLocators } from './checkSummary.locators';
@@ -36,6 +36,25 @@ export class CheckSummaryPage extends BasePage {
     await this.click(this.locators.modalCloseButton);
   }
 
+  /** Scrolls the modal grid horizontally via a real wheel gesture -
+   * confirmed necessary live 2026-09-30: this popup only renders ~4 of
+   * its 20 columns until scrolled (ag-Grid column virtualization, same
+   * quirk as check-register.md's Edge Cases). */
+  async scrollModalGridHorizontally(deltaX: number): Promise<void> {
+    await this.locators.modalGridBody.hover();
+    await this.page.mouse.wheel(deltaX, 0);
+  }
+
+  /** Selects the modal grid's first row - confirmed live 2026-09-30: this
+   * auto-populates the Payee/Address1/Address2/City-State-Zip form fields
+   * below the grid with that row's current values (the actual edit
+   * mechanism for "Edit Check Summary Detail" - see
+   * check-summary-popup.md). Does not click Update - that's a real write,
+   * left to the caller/not exercised by this pass.*/
+  async selectFirstRow(): Promise<void> {
+    await this.click(this.locators.modalGridRow.first());
+  }
+
   // ---------------------------------------------------------------------
   // Exposed for the spec to assert on — assertions belong in the test, not
   // here.
@@ -59,5 +78,13 @@ export class CheckSummaryPage extends BasePage {
 
   modalGridCellLocator(colId: string) {
     return this.locators.modalGridCell(colId);
+  }
+
+  get payeeFieldLocator() {
+    return this.locators.payeeField;
+  }
+
+  get address1FieldLocator() {
+    return this.locators.address1Field;
   }
 }

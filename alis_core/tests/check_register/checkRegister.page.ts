@@ -106,6 +106,18 @@ export class CheckRegisterPage extends BasePage {
     await this.click(this.locators.searchButton);
   }
 
+  async setFromAcctEffDate(date: string): Promise<void> {
+    await this.enter(this.locators.fromAcctEffDateField, date);
+  }
+
+  async setToAcctEffDate(date: string): Promise<void> {
+    await this.enter(this.locators.toAcctEffDateField, date);
+  }
+
+  async clickFirstRowViewIcon(): Promise<void> {
+    await this.click(this.locators.firstRowViewIcon);
+  }
+
   /** Reads the first grid row's Batch No — used to drive a Search By Batch No
    * assertion without hardcoding a batch number from this production-looking
    * environment's ever-changing data (see check-register.md's Edge Cases). */
@@ -182,6 +194,18 @@ export class CheckRegisterPage extends BasePage {
 
   get firstRowPdfExportIconLocator() {
     return this.locators.firstRowPdfExportIcon;
+  }
+
+  get fromAcctEffDateFieldLocator() {
+    return this.locators.fromAcctEffDateField;
+  }
+
+  get toAcctEffDateFieldLocator() {
+    return this.locators.toAcctEffDateField;
+  }
+
+  get firstRowViewIconLocator() {
+    return this.locators.firstRowViewIcon;
   }
 
   get approveButtonLocator() {

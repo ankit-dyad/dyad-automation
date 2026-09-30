@@ -4,6 +4,7 @@ import { reportedStep } from '../../../framework/utils/reportStep';
 import { waitForVisible } from '../../../framework/utils/waits';
 import { LoginPage } from '../login/login.page';
 import { CheckRegisterPage } from './checkRegister.page';
+import { BatchTransactionDetailPage } from '../batch_transaction_detail/batchTransactionDetail.page';
 
 /**
  * From /alis_core/scenarios/alc_sc_check_register_search.md, derived from the
@@ -12,10 +13,10 @@ import { CheckRegisterPage } from './checkRegister.page';
  * Accounting - Bulk Payment Upload to Remittance - End-to-End Test Cases".
  * See alis_core/knowledge/pages/check-register.md.
  *
- * Does not exercise Approve, Print Check, or Remittance Download As — all
- * real writes/downloads against this production-looking environment. Does
- * not exercise the Acct Eff. Date range picker (fragile `app-date-picker`,
- * same caveat as invoice-application.md/payment-upload.md).
+ * Does not exercise Approve, Print Check, or Remittance Download As - all
+ * real writes/downloads against this production-looking environment. Also
+ * does not exercise the Update button on the View icon's Batch Transaction
+ * Detail popup (real write) - the popup itself is opened/closed read-only.
  *
  * The Batch No search step runs immediately after narrowing Client Type
  * (matching this test's original, already-verified ordering) rather than
@@ -46,6 +47,7 @@ test(
 
     const loginPage = new LoginPage(page);
     const checkRegisterPage = new CheckRegisterPage(page);
+    const batchDetailPage = new BatchTransactionDetailPage(page);
 
     const username = getCredential('ALIS_CORE_LOGIN_USER', 'alis_core', 'username');
 
@@ -135,6 +137,57 @@ test(
           ? `Searched Check Register by Batch No "${batchNo}" (the first Agency/Prepared batch found on the filtered grid) and confirmed the grid narrowed to exactly that 1 matching row.`
           : `Searched Check Register by Batch No "${batchNo}" but got ${matchCount} row(s) instead of 1 — likely this production-looking environment's data/filters shifted between reading the batch number and searching for it (see check-register.md's Edge Cases), not a code regression.`,
       { label: 'Matched Batch No cell', locator: checkRegisterPage.gridBatchNoCellsLocator.first() },
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Set the Acct Eff. Date range and re-search',
+      async () => {
+        // Confirmed live 2026-09-30: a plain .fill() works on this
+        // app-date-picker field, same as payment-upload.md's Acct Eff Date -
+        // not actually fragile for this purpose (the earlier "fragile"
+        // caveat only meant its inner <input> has no id/formcontrolname, not
+        // that filling it doesn't work).
+        await checkRegisterPage.setFromAcctEffDate('01/01/2026');
+        await checkRegisterPage.setToAcctEffDate('12/31/2026');
+        await expect(checkRegisterPage.fromAcctEffDateFieldLocator).toHaveValue('01/01/2026');
+        await expect(checkRegisterPage.toAcctEffDateFieldLocator).toHaveValue('12/31/2026');
+        await checkRegisterPage.clickSearch();
+        const rowCount = await checkRegisterPage.rowCount();
+        return rowCount;
+      },
+      (rowCount) =>
+        `Set the Acct Eff. Date range to 01/01/2026-12/31/2026, confirmed both fields accepted the values, and re-searched - the grid returned ${rowCount} row(s) for this range.`,
+      { label: 'From Acct Eff. Date', locator: checkRegisterPage.fromAcctEffDateFieldLocator },
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Open the View icon and confirm it opens the Batch Transaction Detail popup',
+      async () => {
+        const hasRow = await checkRegisterPage.firstRowViewIconLocator
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!hasRow) {
+          return { hasRow, batchNo: null as string | null };
+        }
+
+        const batchNo = await checkRegisterPage.firstRowBatchNo();
+        await checkRegisterPage.clickFirstRowViewIcon();
+        await expect(batchDetailPage.openModalLocator).toBeVisible();
+        await expect(batchDetailPage.modalTitleLocator).toContainText('Batch Detail');
+        await expect(batchDetailPage.modalGridCellLocator('batch_no')).toHaveText(batchNo);
+        await batchDetailPage.closeDetailPopup();
+        await expect(batchDetailPage.openModalLocator).toHaveCount(0);
+        return { hasRow, batchNo };
+      },
+      ({ hasRow, batchNo }) =>
+        hasRow
+          ? `Opened the first row's View icon (Batch #${batchNo}) - confirmed it opens the same Batch Transaction Detail popup as Batch List's own View icon, with a matching batch_no cell, then closed it.`
+          : 'No row was present to open the View icon for - this step was a no-op.',
     );
 
     await reportedStep(
