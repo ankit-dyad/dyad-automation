@@ -156,8 +156,19 @@ live DOM inspection):
   share the same `.ag-tool-panel-wrapper` markup as payment-batch-list.md's
   Filters panel (ag-Grid's standard tool-panel shell, not app-specific).
 - The date-picker fields (`app-date-picker`) have no `id`/`formcontrolname` on
-  their actual `<input>` — only on the wrapping custom element. Same caveat as
-  `payment-upload.md`'s Acct Eff Date field.
+  their actual `<input>` - only on the wrapping custom element. Same caveat as
+  `payment-upload.md`'s Acct Eff Date field. **Confirmed live 2026-09-30: a
+  plain `.fill()` on the inner `<input>` (`#dateFromAcctEff input` /
+  `#dateToAcctEff input`) works fine and changes the grid's returned row
+  count on Search** - not actually fragile for setting a value, only for
+  locator discovery (no id on the input itself). Automated in
+  `alis_core/tests/check_register/`.
+- The View icon (`i[title="View Batch Data"]`, col-id 0 of the pinned-right
+  action group) opens the exact same Batch Transaction Detail popup as Batch
+  List's own View icon (same `data-bs-target="#modalBatchdetail"`
+  dead-reference quirk) - confirmed live 2026-09-30. Automated in
+  `alis_core/tests/check_register/`, reusing
+  `batchTransactionDetail.page.ts`'s modal locators.
 - This is the same production-looking environment as the Payment screen (see
   `payment-batch-list.md`) — real batch/check data, not fixtures. Don't assume
   row count or order is stable run to run; the Batch No search test above is

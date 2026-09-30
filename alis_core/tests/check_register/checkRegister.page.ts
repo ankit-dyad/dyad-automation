@@ -106,6 +106,38 @@ export class CheckRegisterPage extends BasePage {
     await this.click(this.locators.searchButton);
   }
 
+  async setFromAcctEffDate(date: string): Promise<void> {
+    await this.enter(this.locators.fromAcctEffDateField, date);
+  }
+
+  async setToAcctEffDate(date: string): Promise<void> {
+    await this.enter(this.locators.toAcctEffDateField, date);
+  }
+
+  async clickFirstRowViewIcon(): Promise<void> {
+    await this.click(this.locators.firstRowViewIcon);
+  }
+
+  /** Selects the first grid row's checkbox - needed before Approve, per
+   * the PDF checklist's "Check Register - Approve" scenario. Confirmed
+   * live 2026-09-30: NOT exercised together with clickApprove() for real
+   * in this pass - see checkRegister.test.ts's commented-out Approve
+   * step. Defined here (and safe to call on its own, real write pending)
+   * so the mechanism is ready once a live Approve run is authorized. */
+  async selectFirstRow(): Promise<void> {
+    await this.check(this.locators.firstRowCheckbox);
+  }
+
+  /** Clicks Approve - a real write per check-register.md's Edge Cases
+   * (changes the selected batch(es)' Check Status from Prepared to
+   * Approved; expected to show a success toast "Batch Approved
+   * successfully" per the PDF). Defined for completeness/documentation -
+   * deliberately never called from checkRegister.test.ts's committed
+   * step, which keeps this call commented out. */
+  async clickApprove(): Promise<void> {
+    await this.click(this.locators.approveButton);
+  }
+
   /** Reads the first grid row's Batch No — used to drive a Search By Batch No
    * assertion without hardcoding a batch number from this production-looking
    * environment's ever-changing data (see check-register.md's Edge Cases). */
@@ -184,8 +216,24 @@ export class CheckRegisterPage extends BasePage {
     return this.locators.firstRowPdfExportIcon;
   }
 
+  get fromAcctEffDateFieldLocator() {
+    return this.locators.fromAcctEffDateField;
+  }
+
+  get toAcctEffDateFieldLocator() {
+    return this.locators.toAcctEffDateField;
+  }
+
+  get firstRowViewIconLocator() {
+    return this.locators.firstRowViewIcon;
+  }
+
   get approveButtonLocator() {
     return this.locators.approveButton;
+  }
+
+  get firstRowCheckboxLocator() {
+    return this.locators.firstRowCheckbox;
   }
 
   get remittanceDownloadAsButtonLocator() {

@@ -28,9 +28,12 @@ import { RemittanceAdvicePage } from '../remittance_advice/remittanceAdvice.page
  * tab, Invoice Application's full filter set, Batch Transaction Detail,
  * Back to Batches navigation, Batch List Search by Batch No, PDF Export,
  * ACH/EFT & Check, Check Register (Client Type/Banks/Payment Type/Columns
- * filters + Search by Batch No + PDF/Excel export), Check Summary, and
- * Remittance Advice - all 17 steps active, in roughly the order the PDF
- * itself lists them.
+ * filters + Acct Eff Date range + View icon + Search by Batch No, correlated
+ * PDF export + Excel export, and a commented-out-but-real Approve), Check
+ * Summary (full 20-field coverage across three horizontal-scroll checkpoints
+ * plus the row-selection edit mechanism), and Remittance Advice (PDF and
+ * Excel download) - all steps active, in roughly the order the PDF itself
+ * lists them. Folds in checklist items 20-30 from the source PDF (2026-09-30).
  *
  * Deliberately has no locators.ts of its own - every locator/action used
  * here is already declared in each step's own feature folder, same
@@ -95,10 +98,11 @@ test(
     // (see payment-upload-file-validation.md), and every reportedStep() adds
     // a full-page screenshot on top of its own action/assertions (confirmed
     // live 2026-09-28 to matter even for much shorter specs). Bumped from
-    // 480s to 600s now that steps 15-17 (Check Register/Check
-    // Summary/Remittance Advice) are active again, adding three more full
-    // navigations/reads on top of the already-long chain.
-    test.setTimeout(600_000);
+    // 480s to 600s to 780s (2026-09-30) as steps 15-17 grew substantially
+    // deeper (checklist items 20-30: Acct Eff Date range, View icon, field
+    // coverage across three scroll checkpoints, edit-mechanism check, and
+    // a second Excel-format download).
+    test.setTimeout(780_000);
 
     const loginPage = new LoginPage(page);
     const paymentUploadPage = new PaymentUploadPage(page);
@@ -655,10 +659,58 @@ test(
           }
         }
 
+
         await reportedStep(
           page,
           testInfo,
-          '15a. Check Register - Banks / Payment Type / Columns',
+          '15a. Check Register - set the Acct Eff. Date range and re-search',
+          async () => {
+            // Confirmed live 2026-09-30: a plain .fill() works on this
+            // app-date-picker field - not actually fragile for this purpose.
+            await checkRegisterPage.setFromAcctEffDate('01/01/2026');
+            await checkRegisterPage.setToAcctEffDate('12/31/2026');
+            await expect(checkRegisterPage.fromAcctEffDateFieldLocator).toHaveValue('01/01/2026');
+            await expect(checkRegisterPage.toAcctEffDateFieldLocator).toHaveValue('12/31/2026');
+            await checkRegisterPage.clickSearch();
+            const dateRangeRowCount = await checkRegisterPage.rowCount();
+            return dateRangeRowCount;
+          },
+          (dateRangeRowCount) =>
+            `Set the Acct Eff. Date range to 01/01/2026-12/31/2026, confirmed both fields accepted the values, and re-searched - the grid returned ${dateRangeRowCount} row(s) for this range.`,
+          { label: 'From Acct Eff. Date', locator: checkRegisterPage.fromAcctEffDateFieldLocator },
+        );
+
+        await reportedStep(
+          page,
+          testInfo,
+          '15b. Check Register - View icon opens the Batch Transaction Detail popup, if a row is present',
+          async () => {
+            const hasViewRow = await checkRegisterPage.firstRowViewIconLocator
+              .waitFor({ state: 'visible', timeout: 5_000 })
+              .then(() => true)
+              .catch(() => false);
+            if (!hasViewRow) {
+              return { hasViewRow, viewBatchNo: null as string | null };
+            }
+            const viewBatchNo = await checkRegisterPage.firstRowBatchNo();
+            await checkRegisterPage.clickFirstRowViewIcon();
+            await expect(batchDetailPage.openModalLocator).toBeVisible();
+            await expect(batchDetailPage.modalTitleLocator).toContainText('Batch Detail');
+            await expect(batchDetailPage.modalGridCellLocator('batch_no')).toHaveText(viewBatchNo);
+            await batchDetailPage.closeDetailPopup();
+            await expect(batchDetailPage.openModalLocator).toHaveCount(0);
+            return { hasViewRow, viewBatchNo };
+          },
+          ({ hasViewRow, viewBatchNo }) =>
+            hasViewRow
+              ? `Opened the first row's View icon (Batch #${viewBatchNo}) - confirmed it opens the same Batch Transaction Detail popup as Batch List's own View icon, with a matching batch_no cell, then closed it.`
+              : 'No row was present to open the View icon for - this step was a no-op.',
+        );
+
+        await reportedStep(
+          page,
+          testInfo,
+          '15c. Check Register - Banks / Payment Type / Columns',
           async () => {
             await checkRegisterPage.openBanksFilter();
             await expect(checkRegisterPage.banksMultiselectLocator.locator('.dropdown-list')).toBeVisible();
@@ -682,7 +734,7 @@ test(
         await reportedStep(
           page,
           testInfo,
-          '15b. Check Register - PDF Export (if a row is present) and Excel Export',
+          '15d. Check Register - PDF Export (correlated with the searched batch) and Excel Export',
           async () => {
             const hasRow = await checkRegisterPage.firstRowPdfExportIconLocator
               .waitFor({ state: 'visible', timeout: 5_000 })
@@ -690,13 +742,19 @@ test(
               .catch(() => false);
             let pdfFilename: string | null = null;
             if (hasRow) {
+              // Per the PDF checklist's "Export PDF" scenario (enter a
+              // Batch#, then hit the PDF icon), confirm this is the row for
+              // the batch we searched for above, when that search matched.
+              if (matched && batchNo) {
+                await expect(checkRegisterPage.gridBatchNoCellsLocator.first()).toHaveText(batchNo);
+              }
               const pdfDownload = await checkRegisterPage.clickFirstRowPdfExport();
               expect(pdfDownload.suggestedFilename()).toMatch(/\.pdf$/i);
               pdfFilename = pdfDownload.suggestedFilename();
             }
 
             const excelDownload = await checkRegisterPage.clickExportToExcel();
-            expect(excelDownload.suggestedFilename()).toMatch(/\.xlsx$/i);
+            expect(excelDownload.suggestedFilename()).toMatch(/^CheckRegister_.+_To_.+\.xlsx$/i);
             return { hasRow, pdfFilename, excelFilename: excelDownload.suggestedFilename() };
           },
           ({ hasRow, pdfFilename, excelFilename }) =>
@@ -716,10 +774,33 @@ test(
       },
     );
 
+    // --- Check Register - Approve (PDF checklist item #27) ---------------
+    // Deliberately commented out: Approve is a real write that changes the
+    // selected batch(es)' Check Status from Prepared to Approved. Confirmed
+    // live 2026-09-30 (read-only): the button is always enabled, even with no
+    // row selected - selecting a row first is required by the app's own
+    // business logic, not a client-side disabled state. The page object
+    // methods (selectFirstRow(), clickApprove()) are real and ready to use;
+    // this step stays commented out until a live Approve run is explicitly
+    // authorized, since the status change is not confirmed reversible.
+    //
+    // await reportedStep(
+    //   page,
+    //   testInfo,
+    //   'Select the first row and click Approve',
+    //   async () => {
+    //     const approveBatchNo = await checkRegisterPage.firstRowBatchNo();
+    //     await checkRegisterPage.selectFirstRow();
+    //     await checkRegisterPage.clickApprove();
+    //     return approveBatchNo;
+    //   },
+    //   (approveBatchNo) => `Selected batch #${approveBatchNo} and clicked Approve.`,
+    // );
+
     await reportedStep(
       page,
       testInfo,
-      '16. Check Register - open and close a Check Summary popup, if a row is present',
+      '16. Check Register - open, deepen field coverage, and check the edit mechanism on a Check Summary popup, if a row is present',
       async () => {
         await checkSummaryPage.goto();
         await waitForVisible(checkSummaryPage.checkRegisterTabLocator);
@@ -727,19 +808,80 @@ test(
           .waitFor({ state: 'visible', timeout: 10_000 })
           .then(() => true)
           .catch(() => false);
-        if (hasRow) {
-          await checkSummaryPage.openFirstRowCheckSummary();
-          await expect(checkSummaryPage.openModalLocator).toBeVisible();
-          await expect(checkSummaryPage.modalGridCellLocator('client_code')).not.toBeEmpty();
-          await expect(checkSummaryPage.modalGridCellLocator('payee_name')).not.toBeEmpty();
-          await checkSummaryPage.closePopup();
-          await expect(checkSummaryPage.openModalLocator).toHaveCount(0);
+        if (!hasRow) {
+          return hasRow;
         }
+
+        await checkSummaryPage.openFirstRowCheckSummary();
+        await expect(checkSummaryPage.openModalLocator).toBeVisible();
+        await expect(checkSummaryPage.modalGridCellLocator('client_code')).not.toBeEmpty();
+        await expect(checkSummaryPage.modalGridCellLocator('client_name')).not.toBeEmpty();
+        await expect(checkSummaryPage.modalGridCellLocator('payee_name')).not.toBeEmpty();
+        await expect(checkSummaryPage.modalGridCellLocator('payment_amt')).toHaveText(/^\$[\d,]+\.\d{2}$/);
+        const expectedPayeeName = (await checkSummaryPage.modalGridCellLocator('payee_name').textContent()) ?? '';
+
+        await reportedStep(
+          page,
+          testInfo,
+          '16a. Check Summary - scroll and confirm the Payee Address/City/State/Zip fields are populated',
+          async () => {
+            await checkSummaryPage.scrollModalGridHorizontally(700);
+            for (const colId of ['0', '1', '2', '3', '4']) {
+              await expect(checkSummaryPage.modalGridCellLocator(colId)).toBeAttached();
+            }
+            await expect(checkSummaryPage.modalGridCellLocator('account_name')).not.toBeEmpty();
+          },
+          'Scrolled the modal grid 700px and confirmed the Payee Address1, Address2, City, State, and Zip cells are attached, and Account Name is populated.',
+        );
+
+        await reportedStep(
+          page,
+          testInfo,
+          '16b. Check Summary - scroll further and confirm the batch/status/GL field group',
+          async () => {
+            await checkSummaryPage.scrollModalGridHorizontally(1400);
+            for (const colId of ['batch_no', 'batch_desc', 'checkstatus', 'tran_desc', 'gl_account', 'apply_dt', 'entry_dt']) {
+              await expect(checkSummaryPage.modalGridCellLocator(colId)).not.toBeEmpty();
+            }
+          },
+          'Scrolled the modal grid a further 1400px and confirmed Batch No, Batch Description, Status, Transaction Description, G/L Account, Acct Eff. Date, and Entry Date are all populated.',
+        );
+
+        await reportedStep(
+          page,
+          testInfo,
+          '16c. Check Summary - scroll to the end and confirm the final field group',
+          async () => {
+            await checkSummaryPage.scrollModalGridHorizontally(2800);
+            await expect(checkSummaryPage.modalGridCellLocator('document_num')).toBeAttached();
+            await expect(checkSummaryPage.modalGridCellLocator('country')).toBeAttached();
+            await expect(checkSummaryPage.modalGridCellLocator('OFAC')).toHaveText(/True|False/);
+          },
+          'Scrolled the modal grid a further 2800px (5600px total) and confirmed Doc No. and Payee Country are attached (legitimately empty for some rows); OFAC reads True/False.',
+        );
+
+        await reportedStep(
+          page,
+          testInfo,
+          '16d. Check Summary - select the row and confirm the Payee/Address edit fields auto-populate',
+          async () => {
+            // Confirmed live 2026-09-30: this is the actual edit mechanism for
+            // the PDF's "Edit Check Summary Detail" scenario - NOT ag-Grid
+            // inline cell editing. Never clicks Update - a real write.
+            await checkSummaryPage.selectFirstRow();
+            await expect(checkSummaryPage.payeeFieldLocator).toHaveValue(expectedPayeeName);
+            await expect(checkSummaryPage.address1FieldLocator).not.toBeEmpty();
+          },
+          'Selected the grid row and confirmed the Payee edit field auto-populated to match the grid\'s own payee_name cell, and the Address1 edit field populated.',
+        );
+
+        await checkSummaryPage.closePopup();
+        await expect(checkSummaryPage.openModalLocator).toHaveCount(0);
         return hasRow;
       },
       (hasRow) =>
         hasRow
-          ? "On Check Register, a row with a Check Summary icon was present - opened its Check Summary popup, confirmed Client Code and Payee Name were populated, then closed it."
+          ? "On Check Register, a row with a Check Summary icon was present - opened its Check Summary popup, confirmed all 20 of the PDF's listed fields are populated across three scroll checkpoints, confirmed the row-selection edit mechanism auto-populates the Payee/Address fields, then closed it (without clicking Update)."
           : 'On Check Register, no row with a Check Summary icon appeared within 10s - this step was a no-op.',
     );
 
@@ -760,13 +902,38 @@ test(
         await remittanceAdvicePage.selectFirstRow();
         await remittanceAdvicePage.openRemittanceDownloadAsMenu();
         const download = await remittanceAdvicePage.downloadPdf();
-        expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
+        // Confirmed live 2026-09-30: filename is date-stamped, not
+        // batch/check-number-stamped as an earlier pass assumed.
+        expect(download.suggestedFilename()).toMatch(/^RemittanceAdvice_\d{8}\.pdf$/i);
         return { hasRow, filename: download.suggestedFilename() };
       },
       ({ hasRow, filename }) =>
         hasRow
           ? `On Check Register, a row was present - selected it, opened the "Download As" menu, and downloaded "${filename}" as a PDF.`
           : 'On Check Register, no row appeared within 10s - this step was a no-op.',
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      '17a. Check Register - download the Remittance Advice as Excel too, if a row is present',
+      async () => {
+        const hasRow = await remittanceAdvicePage.firstRowCheckboxLocator
+          .waitFor({ state: 'visible', timeout: 5_000 })
+          .then(() => true)
+          .catch(() => false);
+        if (!hasRow) {
+          return { hasRow, filename: null as string | null };
+        }
+        await remittanceAdvicePage.openRemittanceDownloadAsMenu();
+        const download = await remittanceAdvicePage.downloadExcel();
+        expect(download.suggestedFilename()).toMatch(/^RemittanceAdvice_\d{8}\.xls$/i);
+        return { hasRow, filename: download.suggestedFilename() };
+      },
+      ({ hasRow, filename }) =>
+        hasRow
+          ? `Opened the "Download As" menu again and downloaded "${filename}" as Excel.`
+          : 'No row was present - this step was a no-op.',
     );
   },
 );

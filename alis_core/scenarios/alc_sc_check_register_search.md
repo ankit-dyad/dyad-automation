@@ -28,6 +28,13 @@ pages: [login, check-register]
 11. Export the current filtered grid to Excel via the Excel button (also a
     genuine file download).
 
+12. Set the Acct Eff. Date range (01/01/2026-12/31/2026) and re-search -
+    confirmed a plain `.fill()` works despite the `app-date-picker`
+    component having no id on its own inner input; not actually fragile.
+13. Open the first row's View icon and confirm it opens the same Batch
+    Transaction Detail popup as Batch List's own View icon, with a
+    matching batch_no cell - a no-op if no row is present.
+
 <!--
 Source: "ALIS Accounting - Bulk Payment Upload to Remittance - End-to-End Test
 Cases" PDF, test scenarios "Check register", "Check Register - Filters"
@@ -38,12 +45,11 @@ reason noted in alis_core/knowledge/pages/payment-upload.md.
 
 Does not exercise Approve, Print Check, or Remittance Download As - all real
 writes/downloads against this production-looking environment (see
-payment-batch-list.md's "Create Batch performs a real write" note). Does not
-exercise the Acct Eff. Date range picker (fragile `app-date-picker`, not yet
-characterized in this app). The row-level View / Check Summary actions are
-covered by their own scenarios (batch-transaction-detail-popup,
-check-summary-popup) - PDF Export (step 10) is this screen's own row-level
-action, distinct from those two and from Batch List's own PDF Export.
+payment-batch-list.md's "Create Batch performs a real write" note). The
+row-level View / Check Summary actions are covered by their own scenarios
+(step 13, and check-summary-popup) - PDF Export (step 10) is this screen's
+own row-level action, distinct from those two and from Batch List's own
+PDF Export.
 
 Step 6's assertion is intentionally tolerant, not a hard failure, for a known
 race confirmed live 2026-09-29 (see check-register.md's Edge Cases/
