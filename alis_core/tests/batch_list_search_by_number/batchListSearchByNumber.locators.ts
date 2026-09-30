@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 
 /**
  * Locator definitions for the Batch List tab's "Filters" side panel /
@@ -27,13 +27,31 @@ export class BatchListSearchByNumberLocators {
   /** ag-Grid's built-in Filters tool panel — see payment-batch-list.md's
    * Selectors table. Scoping every filter-panel locator under this wrapper
    * (rather than the whole pane) avoids accidentally matching the grid's own
-   * "Batch No" column header, which has the same visible text. */
+   * "Batch No" column header, which has the same visible text.
+   *
+   * `:visible`-scoped - same fix as invoiceApplication.locators.ts's
+   * filterToolPanel (confirmed live 2026-09-30): this grid mounts **two**
+   * `.ag-tool-panel-wrapper` elements at once (one for Columns, one for
+   * Filters), only one of which is actually visible depending on which
+   * side-tab is active. Without `:visible`, downstream locators
+   * (batchNoGroupHeader, batchNoSearchInput, selectAllCheckbox) can silently
+   * resolve against the wrong (hidden) wrapper. */
   get filterToolPanel() {
-    return this.pane.locator('.ag-tool-panel-wrapper');
+    return this.pane.locator('.ag-tool-panel-wrapper:visible');
   }
 
   get filtersTab() {
     return this.pane.getByRole('tab', { name: 'Filters' });
+  }
+
+  /** The grid's vertical scroll container — same element/recipe as
+   * batchListVerification.locators.ts's verticalViewport. Needed here too:
+   * after clearBatchNoFilter() restores the full, unfiltered, ascending-
+   * sorted grid, a freshly-created batch (always the highest number) sorts
+   * to the very bottom and isn't in the DOM (ag-Grid row virtualization)
+   * until scrolled there — see scrollGridToBottom() on the Page Object. */
+  get verticalViewport() {
+    return this.pane.locator('.ag-body-viewport');
   }
 
   get batchNoGroupHeader() {
@@ -67,6 +85,6 @@ export class BatchListSearchByNumberLocators {
    * finds no boundary there and never matches. Digit-based lookaround avoids
    * that. */
   rowForBatch(batchNo: string) {
-    return this.gridRows.filter({ hasText: new RegExp(`(?<!\\d)${batchNo}(?!\\d)`) });
+    return this.gridRows.filter({ hasText: new RegExp(`(?<!\d)${batchNo}(?!\d)`) });
   }
 }

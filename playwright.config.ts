@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+﻿import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Plain Playwright config — no AI calls happen from anything under a product's
@@ -44,6 +44,18 @@ export default defineConfig({
     trace: 'on',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    /* Confirmed live 2026-09-29/2026-09-30 (alis_core): with no default here,
+     * a single locator action (e.g. BasePage.click()) that never becomes
+     * actionable rides the ENTIRE outer test.setTimeout() instead of failing
+     * fast - twice now, on two different locators, each eating 5-14+ minutes
+     * of a real-write test before finally erroring. This bounds every
+     * locator action (click/fill/check/selectOption/etc., including
+     * BasePage's own helpers) to a sane default so a genuine hang fails
+     * quickly with a clear "Timeout 30000ms exceeded" message instead of
+     * masquerading as the outer test timeout. Well within every spec's own
+     * test.setTimeout() (60s-600s across this suite), so this should never
+     * fire on a merely-slow-but-eventually-successful action. */
+    actionTimeout: 30_000,
   },
 
   projects: [

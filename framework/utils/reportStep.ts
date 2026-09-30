@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+﻿import { test } from '@playwright/test';
 import type { Locator, Page, TestInfo } from '@playwright/test';
 
 /** One element to visually highlight and content-validate before the
@@ -65,6 +65,18 @@ function sanitizeAttachmentName(name: string): string {
  * target would have shown only its last one. Draws independent boxes via a
  * plain `getBoundingClientRect()`-positioned overlay `<div>` per target
  * instead, so every target in the array stays visible simultaneously.
+ *
+ * Passes `box: true` to `test.step()` (confirmed supported live 2026-09-30 —
+ * this repo pins Playwright ^1.62, well past the 1.42 introduction of this
+ * option): without it, the HTML report nests every raw Playwright action
+ * this step performs internally (`Fill "qable1" locator('#txtUserName')`,
+ * `Click locator(...)`, `Wait for selector`, ...) directly under the step,
+ * which is fine for an engineer debugging a failure but unreadable noise for
+ * a non-engineer stakeholder skimming the report. `box: true` collapses all
+ * of that out of both the report tree and failure stack traces, leaving just
+ * the clean narrative title plus the log/screenshot/content-validation
+ * attachments this function already builds — a report a stakeholder can read
+ * top to bottom without ever expanding a step.
  */
 export async function reportedStep<T>(
   page: Page,
@@ -74,67 +86,71 @@ export async function reportedStep<T>(
   log?: string | ((result: T) => string),
   highlight?: HighlightTarget | HighlightTarget[],
 ): Promise<T> {
-  return test.step(title, async () => {
-    const result = await action();
-    const safeTitle = sanitizeAttachmentName(title);
+  return test.step(
+    title,
+    async () => {
+      const result = await action();
+      const safeTitle = sanitizeAttachmentName(title);
 
-    const logText = typeof log === 'function' ? log(result) : log;
-    if (logText) {
-      await testInfo.attach(`${safeTitle} - log`, { body: logText, contentType: 'text/plain' });
-    }
-
-    const targets = highlight ? (Array.isArray(highlight) ? highlight : [highlight]) : [];
-    if (targets.length > 0) {
-      const lines: string[] = [];
-      for (const { label, locator } of targets) {
-        try {
-          const text = (await locator.textContent({ timeout: 5_000 }))?.trim();
-          lines.push(`${label}: "${text ?? ''}"`);
-          await locator.evaluate((el, attr) => {
-            // Avoids referencing the bare `document`/`window` globals
-            // directly — this repo's tsconfig has no "dom" lib, but
-            // Playwright's own `evaluate()` typings still supply full
-            // Element/Node types for `el` and anything reachable from it
-            // (e.g. `el.ownerDocument`), so routing through that instead
-            // of the ambient global keeps this typechecking cleanly.
-            const doc = el.ownerDocument;
-            const rect = el.getBoundingClientRect();
-            const box = doc.createElement('div');
-            box.setAttribute(attr, 'true');
-            Object.assign(box.style, {
-              position: 'fixed',
-              left: `${rect.left}px`,
-              top: `${rect.top}px`,
-              width: `${rect.width}px`,
-              height: `${rect.height}px`,
-              border: '3px solid #ff3366',
-              boxShadow: '0 0 0 2px rgba(255, 51, 102, 0.35)',
-              zIndex: '2147483647',
-              pointerEvents: 'none',
-              boxSizing: 'border-box',
-            });
-            doc.body.appendChild(box);
-          }, HIGHLIGHT_MARKER_ATTR);
-        } catch {
-          lines.push(`${label}: (could not read - not found or not attached)`);
-        }
+      const logText = typeof log === 'function' ? log(result) : log;
+      if (logText) {
+        await testInfo.attach(`${safeTitle} - log`, { body: logText, contentType: 'text/plain' });
       }
-      await testInfo.attach(`${safeTitle} - content validation`, {
-        body: lines.join('\n'),
-        contentType: 'text/plain',
-      });
-    }
 
-    const screenshot = await page.screenshot({ fullPage: true });
-    await testInfo.attach(`${safeTitle} - screenshot`, { body: screenshot, contentType: 'image/png' });
+      const targets = highlight ? (Array.isArray(highlight) ? highlight : [highlight]) : [];
+      if (targets.length > 0) {
+        const lines: string[] = [];
+        for (const { label, locator } of targets) {
+          try {
+            const text = (await locator.textContent({ timeout: 5_000 }))?.trim();
+            lines.push(`${label}: "${text ?? ''}"`);
+            await locator.evaluate((el, attr) => {
+              // Avoids referencing the bare `document`/`window` globals
+              // directly — this repo's tsconfig has no "dom" lib, but
+              // Playwright's own `evaluate()` typings still supply full
+              // Element/Node types for `el` and anything reachable from it
+              // (e.g. `el.ownerDocument`), so routing through that instead
+              // of the ambient global keeps this typechecking cleanly.
+              const doc = el.ownerDocument;
+              const rect = el.getBoundingClientRect();
+              const box = doc.createElement('div');
+              box.setAttribute(attr, 'true');
+              Object.assign(box.style, {
+                position: 'fixed',
+                left: `${rect.left}px`,
+                top: `${rect.top}px`,
+                width: `${rect.width}px`,
+                height: `${rect.height}px`,
+                border: '3px solid #ff3366',
+                boxShadow: '0 0 0 2px rgba(255, 51, 102, 0.35)',
+                zIndex: '2147483647',
+                pointerEvents: 'none',
+                boxSizing: 'border-box',
+              });
+              doc.body.appendChild(box);
+            }, HIGHLIGHT_MARKER_ATTR);
+          } catch {
+            lines.push(`${label}: (could not read - not found or not attached)`);
+          }
+        }
+        await testInfo.attach(`${safeTitle} - content validation`, {
+          body: lines.join('\n'),
+          contentType: 'text/plain',
+        });
+      }
 
-    if (targets.length > 0) {
-      await page
-        .locator(`[${HIGHLIGHT_MARKER_ATTR}]`)
-        .evaluateAll((elements) => elements.forEach((el) => el.remove()))
-        .catch(() => {});
-    }
+      const screenshot = await page.screenshot({ fullPage: true });
+      await testInfo.attach(`${safeTitle} - screenshot`, { body: screenshot, contentType: 'image/png' });
 
-    return result;
-  });
+      if (targets.length > 0) {
+        await page
+          .locator(`[${HIGHLIGHT_MARKER_ATTR}]`)
+          .evaluateAll((elements) => elements.forEach((el) => el.remove()))
+          .catch(() => {});
+      }
+
+      return result;
+    },
+    { box: true },
+  );
 }

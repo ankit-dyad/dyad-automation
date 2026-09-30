@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 
 /**
  * Locator definitions for the Alis Core Accounting Payment screen's Batch
@@ -63,5 +63,16 @@ export class BatchTransactionDetailLocators {
    * the first copy. See batch-transaction-detail-popup.md's Edge Cases. */
   modalGridCell(colId: string) {
     return this.openModal.locator(`.ag-center-cols-container [col-id="${colId}"]`).first();
+  }
+
+  /** A convenient point inside the modal grid to anchor a wheel-scroll
+   * gesture at - same recipe as every other ag-Grid horizontal-
+   * virtualization case in this app (see payment-batch-list.md's scroll-
+   * gesture note). Confirmed live 2026-09-30: this popup's grid only
+   * renders its first 5 columns (batch_no, batch_desc, status, tran_desc,
+   * gl_account) until scrolled - the PDF's fuller ~23-field list needs
+   * this to render at all. */
+  get modalGridBody() {
+    return this.openModal.locator('.ag-center-cols-viewport');
   }
 }

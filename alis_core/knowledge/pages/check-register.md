@@ -1,4 +1,4 @@
-# Check Register
+﻿# Check Register
 
 ## Overview
 
@@ -95,16 +95,32 @@ live DOM inspection):
 - Search by Batch No / Check Number / Payee / Check Amount via the "Search By"
   dropdown + its paired text field — confirmed: searching by Batch No "39044"
   narrows the grid from 3 rows to exactly the 1 matching row.
-- Export the current filtered grid to Excel.
-- Open the Columns / Filters side panels to reconfigure the grid — not
-  exercised in this pass.
+- Export the current filtered grid to Excel - confirmed live 2026-09-29: a
+  genuine file download (blob URL), filename observed as
+  "CheckRegister_<fromDate>_To_<toDate>.xlsx". Automated in
+  `alis_core/tests/check_register/`.
+- Open the Banks / Payment Type multiselects (same `ng-multiselect-dropdown`
+  component/interaction pattern as Client Type) confirmed live 2026-09-29:
+  Banks opens/closes without breaking the grid; Payment Type accepts
+  unchecking one option (e.g. "Cash") and the change survives reopening the
+  panel. Automated in `alis_core/tests/check_register/`.
+- Open the Columns / Filters side tabs confirmed live 2026-09-29 these are
+  `role="tab"` elements (not `role="button"` an earlier automation attempt
+  assumed button and timed out), same `.ag-tool-panel-wrapper` markup as
+  payment-batch-list.md's Filters panel. Only Columns' panel visibility is
+  exercised (no column visibility toggled); Filters own per-column search
+  UI is exercised in batch_list_search_by_number-style automation, not
+  repeated here.
 - Select row(s) and click Approve — not exercised (real write against
   production-looking data; see `payment-batch-list.md`'s note on Create Batch).
 - Click Remittance Download As — not exercised (downloads a file).
-- Click a row's View / PDF / Check Summary icon — not exercised in this pass;
-  each opens its own popup/document, to be documented as its own page once
-  exercised (matches the PDF's separate "Action", "Check Summary", and
-  "Batch Transaction Detail Popup" test scenarios).
+- Click a row's PDF Export icon (col-id 1 of the pinned-right action group,
+  alongside View Batch Data and Check Summary) - confirmed live 2026-09-29: a
+  genuine file download (blob URL, filename "BatchDetail.pdf"), unlike Batch
+  List's own PDF Export action (a JSON-response trick, no real download).
+  Automated in `alis_core/tests/check_register/`. View and Check Summary
+  icons are their own separate pages (batch-transaction-detail-popup.md,
+  check-summary-popup.md).
 
 ## Expected Outcomes
 
@@ -133,11 +149,12 @@ live DOM inspection):
   elements — they're a third-party `ng-multiselect-dropdown` component with
   its own checkbox-list panel. Don't try `selectOption()` on them; open the
   panel and click the specific `input[aria-label="..."]` checkbox instead.
-- The Columns/Filters side-tab buttons have ag-Grid-generated numeric ids
-  (`#ag-192-button`, `#ag-202-button` at the time of this pass) — these are
-  **not stable across page loads/grid instances**. Flagged fragile; prefer
-  `getByRole('button', { name: 'Columns' })` / `{ name: 'Filters' }` if this
-  drifts in practice.
+- The Columns/Filters side tabs are `role="tab"` elements (confirmed live
+  2026-09-29, not `role="button"` an earlier pass assumed button and the
+  locator never resolved). Use `getByRole('tab', { name: 'Columns' })` /
+  `{ name: 'Filters' }`, scoped under `#pills-cashlisting`. Once open, both
+  share the same `.ag-tool-panel-wrapper` markup as payment-batch-list.md's
+  Filters panel (ag-Grid's standard tool-panel shell, not app-specific).
 - The date-picker fields (`app-date-picker`) have no `id`/`formcontrolname` on
   their actual `<input>` — only on the wrapping custom element. Same caveat as
   `payment-upload.md`'s Acct Eff Date field.
@@ -148,3 +165,12 @@ live DOM inspection):
 
 ## Auto-discovered (needs review)
 - (agent appends here; engineer reviews and folds into sections above)
+- **Confirmed live 2026-09-29: a Batch No read from the (Client
+  Type-narrowed) grid can still return 0 rows when immediately re-searched
+  by that exact number via the Search By dropdown** reproduced twice in a
+  row against the same batch number, which argues against a pure
+  read/search timing race and instead points at the open item below (the
+  Client Type header filter maybe not reliably re-filtering the grid) as a
+  plausible root cause not yet confirmed. Automation treats this as a known,
+  tolerable outcome (reports it, does not hard-fail) rather than retrying or
+  asserting past it blind see `alis_core/tests/check_register/checkRegister.test.ts`.

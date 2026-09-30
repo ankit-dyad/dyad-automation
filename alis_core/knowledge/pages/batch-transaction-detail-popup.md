@@ -1,4 +1,4 @@
-# Batch Transaction Detail Popup
+﻿# Batch Transaction Detail Popup
 
 ## Overview
 
@@ -30,7 +30,7 @@ tab). Reached only by clicking a row's View icon; not directly navigable.
 | Modal title | `.modal.show .modal-title` | Text: "Batch Detail # `<BatchNo>`" |
 | Close (X) button | `.modal.show .btn-close` | `data-bs-dismiss="modal"` |
 | Summary grid row | `.modal.show .ag-center-cols-container .ag-row` | ag-Grid; same center-container-only caveat as check-register.md (a pinned-column duplicate also exists) |
-| Grid cells | `.modal.show .ag-center-cols-container [col-id="<name>"]` | Confirmed `col-id`s: `batch_no`, `batch_desc`, `status`, `tran_desc`, `gl_account` |
+| Grid cells | `.modal.show .ag-center-cols-container [col-id="<name>"]` | Confirmed 20 `col-id`s via horizontal scroll (2026-09-30): `batch_no`, `batch_desc`, `status`, `tran_desc`, `gl_account` (visible pre-scroll); `account_name`, `apply_dt`, `entry_dt`, `document_num`, `client_type`, `client_code`, `payee_name`, `invoice_code` (after 700px scroll); `insured_name`, `policy_number`, `total_amt`, `due_amt`, `payment_amt`, `adj_amt`, `adj_account` (after a further 1400px scroll, i.e. 2100px total). ag-Grid virtualizes columns both in and out as this modal grid scrolls - a column confirmed present at one scroll offset can drop out of the DOM at another, so automation must check each field at the scroll offset it was actually confirmed at (see batchTransactionDetail.test.ts). |
 
 ## Actions
 
@@ -44,11 +44,14 @@ tab). Reached only by clicking a row's View icon; not directly navigable.
   the row that was clicked (confirmed: batch #35066 → Batch No "35066", Status
   "Approved", GL Account "110201").
 - The PDF's fuller field list for this popup (Client Type, Account Name, Acct
-  Eff Date, Entry Date, Payer/Payee Name, etc. — see the PDF's page-3
-  "Action — Verify View Batch Data" scenario) was **not** all visible in this
-  pass; only 5 columns rendered without any observed horizontal-scroll or
-  column-configuration interaction. Treat the wider field list as unconfirmed
-  on this environment until the grid is scrolled/inspected further.
+  Eff Date, Entry Date, Payer/Payee Name, etc. - see the PDF's page-3
+  "Action - Verify View Batch Data" scenario) is now confirmed: 20 of the
+  ~23 listed fields render after horizontal scrolling (see the Selectors
+  table above for the full col-id list and their scroll offsets). The
+  remaining 3 (Cost Center, Policy Status, Billing) were not found at any
+  scroll offset tried - consistent with Cost Center also not existing on
+  this environment's Payment Upload tab (see payment-upload.md), so likely
+  an environment difference rather than a gap in this automation.
 
 ## Edge Cases / Known Quirks
 

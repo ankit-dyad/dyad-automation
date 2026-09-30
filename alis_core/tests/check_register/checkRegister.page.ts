@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { CheckRegisterLocators } from './checkRegister.locators';
@@ -55,11 +55,43 @@ export class CheckRegisterPage extends BasePage {
     }
   }
 
+  /** Opens the Banks multiselect panel (if not already open). */
+  async openBanksFilter(): Promise<void> {
+    await this.click(this.locators.banksMultiselectToggle);
+  }
+
+  /** Unchecks one Banks option — same shape/caveats as uncheckClientType(). */
+  async uncheckBank(label: string): Promise<void> {
+    const checkbox = this.locators.banksOption(label);
+    if (await checkbox.isChecked()) {
+      await this.click(this.locators.banksOptionRow(label));
+    }
+  }
+
+  /** Opens the Payment Type multiselect panel (if not already open). */
+  async openPaymentTypeFilter(): Promise<void> {
+    await this.click(this.locators.paymentTypeMultiselectToggle);
+  }
+
+  /** Unchecks one Payment Type option — same shape/caveats as
+   * uncheckClientType(). */
+  async uncheckPaymentType(label: string): Promise<void> {
+    const checkbox = this.locators.paymentTypeOption(label);
+    if (await checkbox.isChecked()) {
+      await this.click(this.locators.paymentTypeOptionRow(label));
+    }
+  }
+
   /** Closes an open multiselect panel by clicking the page's own heading —
    * neutral, always-present, and outside any dropdown/menu that a stray
    * top-corner click could otherwise land on. */
   async closeOpenFilterPanel(): Promise<void> {
     await this.page.getByRole('heading', { name: 'Check Register', exact: true }).click();
+  }
+
+  /** Opens ag-Grid's Columns side panel (if not already open). */
+  async openColumnsPanel(): Promise<void> {
+    await this.click(this.locators.columnsSideTab);
   }
 
   async setSearchBy(option: string): Promise<void> {
@@ -85,6 +117,24 @@ export class CheckRegisterPage extends BasePage {
     return this.locators.gridRows.count();
   }
 
+  /** Clicks Export to Excel and returns the resulting Download - a genuine
+   * file (blob URL), not a response-inspection trick (confirmed live
+   * 2026-09-29). */
+  async clickExportToExcel(): Promise<import('@playwright/test').Download> {
+    const download = this.page.waitForEvent('download');
+    await this.click(this.locators.exportToExcelButton);
+    return download;
+  }
+
+  /** Clicks the first row's PDF Export icon and returns the resulting
+   * Download - a genuine file (blob URL, "BatchDetail.pdf"), unlike Batch
+   * List's own PDF Export icon (confirmed live 2026-09-29). */
+  async clickFirstRowPdfExport(): Promise<import('@playwright/test').Download> {
+    const download = this.page.waitForEvent('download');
+    await this.click(this.locators.firstRowPdfExportIcon);
+    return download;
+  }
+
   // ---------------------------------------------------------------------
   // Exposed for the spec to assert on — assertions belong in the test, not
   // here.
@@ -102,6 +152,22 @@ export class CheckRegisterPage extends BasePage {
     return this.locators.clientTypeMultiselect;
   }
 
+  get banksMultiselectLocator() {
+    return this.locators.banksMultiselect;
+  }
+
+  get paymentTypeMultiselectLocator() {
+    return this.locators.paymentTypeMultiselect;
+  }
+
+  get columnsSideTabLocator() {
+    return this.locators.columnsSideTab;
+  }
+
+  get columnsToolPanelLocator() {
+    return this.locators.columnsToolPanel;
+  }
+
   get searchByDropdownLocator() {
     return this.locators.searchByDropdown;
   }
@@ -112,6 +178,10 @@ export class CheckRegisterPage extends BasePage {
 
   get exportToExcelButtonLocator() {
     return this.locators.exportToExcelButton;
+  }
+
+  get firstRowPdfExportIconLocator() {
+    return this.locators.firstRowPdfExportIcon;
   }
 
   get approveButtonLocator() {
