@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { RemittanceAdviceLocators } from './remittanceAdvice.locators';
@@ -43,6 +43,20 @@ export class RemittanceAdvicePage extends BasePage {
     const [download] = await Promise.all([
       this.page.waitForEvent('download'),
       this.click(this.locators.pdfOption),
+    ]);
+    return download;
+  }
+
+  /** Triggers the "Excel Format" download and returns the resulting
+   * Download object - confirmed live 2026-09-30: both "Excel Data Only"
+   * and "Excel Format" produce the same filename pattern
+   * (`RemittanceAdvice_<YYYYMMDD>.xls`); "Excel Format" is used here since
+   * it matches the PDF checklist's "Excel version of the Remittance
+   * Advice" scenario most directly. */
+  async downloadExcel() {
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download'),
+      this.click(this.locators.excelFormatOption),
     ]);
     return download;
   }

@@ -42,14 +42,18 @@ test(
     // action/assertions — confirmed live 2026-09-28: that overhead alone
     // pushed a 9-step spec (invoiceApplication.test.ts) over its unset
     // default 30s test timeout. Bumped defensively across every retrofitted
-    // spec, not just that one.
-    test.setTimeout(60_000);
+    // spec, not just that one. Bumped further (60s -> 90s -> 150s) 2026-09-30
+    // after adding the Acct Eff Date range and View icon steps, and after
+    // confirmed run-to-run duration variance on this live environment pushed
+    // a 90s budget right to its edge.
+    test.setTimeout(150_000);
 
     const loginPage = new LoginPage(page);
     const checkRegisterPage = new CheckRegisterPage(page);
     const batchDetailPage = new BatchTransactionDetailPage(page);
 
     const username = getCredential('ALIS_CORE_LOGIN_USER', 'alis_core', 'username');
+    let searchedBatchNo: string | null = null;
 
     await reportedStep(
       page,
@@ -129,6 +133,7 @@ test(
         const matchCount = await checkRegisterPage.rowCount();
         if (matchCount === 1) {
           await expect(checkRegisterPage.gridBatchNoCellsLocator.first()).toHaveText(batchNo);
+          searchedBatchNo = batchNo;
         }
         return { batchNo, matchCount };
       },
@@ -247,7 +252,7 @@ test(
     await reportedStep(
       page,
       testInfo,
-      'Export the first row as PDF, if a row is present',
+      'Export the searched batch\'s row as PDF, if present',
       async () => {
         // Guarded rather than assumed: the Batch No search step above is
         // tolerant of a known data race and can leave the grid at 0 rows
@@ -262,13 +267,22 @@ test(
         if (!hasRow) {
           return { hasRow, filename: null as string | null };
         }
+
+        // Per the PDF checklist's "Export PDF" scenario (enter a Batch#,
+        // then hit the PDF icon), confirm this is the row for the batch we
+        // searched for above (not just an arbitrary first row), when that
+        // search itself succeeded.
+        if (searchedBatchNo) {
+          await expect(checkRegisterPage.gridBatchNoCellsLocator.first()).toHaveText(searchedBatchNo);
+        }
+
         const download = await checkRegisterPage.clickFirstRowPdfExport();
         expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
         return { hasRow, filename: download.suggestedFilename() };
       },
       ({ hasRow, filename }) =>
         hasRow
-          ? `Clicked the first row's PDF Export icon and downloaded "${filename}" as a PDF - a genuine file (blob URL), unlike Batch List's own PDF Export action (a JSON-response trick, no real download).`
+          ? `Clicked the searched batch\'s PDF Export icon and downloaded "${filename}" as a PDF - a genuine file (blob URL), unlike Batch List\'s own PDF Export action (a JSON-response trick, no real download).`
           : 'No row was present to export as PDF - this step was a no-op.',
       { label: 'PDF Export icon (first row)', locator: checkRegisterPage.firstRowPdfExportIconLocator },
     );
@@ -279,12 +293,40 @@ test(
       'Export the current filtered grid to Excel',
       async () => {
         const download = await checkRegisterPage.clickExportToExcel();
-        expect(download.suggestedFilename()).toMatch(/\.xlsx$/i);
+        expect(download.suggestedFilename()).toMatch(/^CheckRegister_.+_To_.+\.xlsx$/i);
         return download.suggestedFilename();
       },
       (filename) =>
         `Clicked Export to Excel and downloaded "${filename}" - the current filtered grid's data as a genuine .xlsx file (this button doesn't depend on any specific row being present, unlike PDF Export above).`,
       { label: 'Export to Excel button', locator: checkRegisterPage.exportToExcelButtonLocator },
     );
+
+    // --- Check Register - Approve (PDF checklist item #27) ---------------
+    // Deliberately commented out: Approve is a real write that changes the
+    // selected batch(es)' Check Status from Prepared to Approved. Confirmed
+    // live 2026-09-30 (read-only): the button is always enabled, even with no
+    // row selected (same as Check Summary's Update / Remittance Download As -
+    // see check-register.md's Edge Cases) - selecting a row first is required
+    // by the app's own business logic, not a client-side disabled state. The
+    // page object methods below (selectFirstRow(), clickApprove()) are real
+    // and ready to use; this step stays commented out until a live Approve
+    // run is explicitly authorized, since the status change is not confirmed
+    // reversible.
+    //
+    // await reportedStep(
+    //   page,
+    //   testInfo,
+    //   'Select the first row and click Approve',
+    //   async () => {
+    //     const batchNo = await checkRegisterPage.firstRowBatchNo();
+    //     await checkRegisterPage.selectFirstRow();
+    //     await checkRegisterPage.clickApprove();
+    //     // Expected per the PDF: a success toast reading "Batch Approved
+    //     // successfully", and the batch reappearing under Check Status =
+    //     // Approved on a subsequent search.
+    //     return batchNo;
+    //   },
+    //   (batchNo) => `Selected batch #${batchNo} and clicked Approve.`,
+    // );
   },
 );

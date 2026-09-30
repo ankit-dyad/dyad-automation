@@ -171,6 +171,20 @@ export class CheckRegisterLocators {
     return this.pane.locator('#btnApprove');
   }
 
+  /** Same ag-Grid row-selection checkbox pattern as remittance-advice.md -
+   * needed to select a row before Approve, per the PDF checklist's "Check
+   * Register - Approve" scenario. Confirmed live 2026-09-30: Approve's own
+   * button is never disabled either way (same as remittance-advice.md's
+   * Remittance Download As), so this selection is required by the app's
+   * own business logic, not enforced client-side by a disabled button.
+   * NOT exercised for real in this pass - see checkRegister.test.ts's
+   * commented-out Approve step. */
+  get firstRowCheckbox() {
+    return this.pane
+      .locator('.ag-center-cols-container .ag-row .ag-selection-checkbox input[type="checkbox"]')
+      .first();
+  }
+
   get remittanceDownloadAsButton() {
     return this.pane.locator('button:has-text("Remittance Download As")');
   }
