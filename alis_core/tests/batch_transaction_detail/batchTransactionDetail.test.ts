@@ -1,4 +1,4 @@
-import { test, expect } from '../../../framework/fixtures';
+﻿import { test, expect } from '../../../framework/fixtures';
 import { getCredential } from '../../../framework/utils/env';
 import { reportedStep } from '../../../framework/utils/reportStep';
 import { waitForVisible } from '../../../framework/utils/waits';
@@ -79,6 +79,57 @@ test(
       [
         { label: 'Modal title', locator: batchDetailPage.modalTitleLocator },
         { label: 'Modal batch_no cell', locator: batchDetailPage.modalGridCellLocator('batch_no') },
+      ],
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Confirm the popup\'s pre-scroll fields are populated (Transaction Description, GL Account)',
+      async () => {
+        await expect(batchDetailPage.modalGridCellLocator('tran_desc')).toBeAttached();
+        await expect(batchDetailPage.modalGridCellLocator('gl_account')).toBeAttached();
+      },
+      'Confirmed the Transaction Description and GL Account cells are attached before any scroll.',
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Scroll the modal grid and confirm the next field group is populated',
+      async () => {
+        // Confirmed live 2026-09-30: ag-Grid virtualizes columns both in AND
+        // out as the modal grid scrolls - tran_desc/gl_account (checked above,
+        // pre-scroll) drop out of the DOM by this point, so this step only
+        // checks the fields confirmed present at exactly this scroll position.
+        await batchDetailPage.scrollModalGridHorizontally(700);
+
+        const fields = ['account_name', 'apply_dt', 'entry_dt', 'document_num', 'client_type', 'client_code', 'payee_name', 'invoice_code'];
+        for (const colId of fields) {
+          await expect(batchDetailPage.modalGridCellLocator(colId)).toBeAttached();
+        }
+      },
+      'Scrolled the modal grid 700px and confirmed 8 fields are populated: Account Name, Acct Eff Date, Entry Date, Document No., Client Type, Client Code, Payer/Payee Name, and Invoice Code.',
+      [
+        { label: 'Client Code cell', locator: batchDetailPage.modalGridCellLocator('client_code') },
+      ],
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Scroll the modal grid further and confirm the final field group is populated',
+      async () => {
+        await batchDetailPage.scrollModalGridHorizontally(1400);
+
+        const fields = ['insured_name', 'policy_number', 'total_amt', 'due_amt', 'payment_amt', 'adj_amt', 'adj_account'];
+        for (const colId of fields) {
+          await expect(batchDetailPage.modalGridCellLocator(colId)).toBeAttached();
+        }
+      },
+      'Scrolled the modal grid a further 1400px and confirmed 7 more fields are populated: Insured Name, Policy Number, Total Amount, Due Amount, Payment Amt, Adj Amt, and Adj Account.',
+      [
+        { label: 'Total Amount cell', locator: batchDetailPage.modalGridCellLocator('total_amt') },
       ],
     );
 

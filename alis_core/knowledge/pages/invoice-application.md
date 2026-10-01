@@ -1,4 +1,4 @@
-# Invoice Application
+﻿# Invoice Application
 
 ## Overview
 
@@ -22,6 +22,13 @@ overlaid on `#/payment`. Reached only by clicking a payment record's "Add
 Invoice" (+) icon; not directly navigable.
 
 ## Reaching this page
+
+Step 1's batch can be a specific one confirmed to exist, instead of
+"whichever is first" - read the first row's Batch No, then re-isolate the
+grid to that exact number via the Filters side panel's (Select All) recipe
+(same mechanism as `payment-batch-list.md`'s Selectors table /
+`batchListSearchByNumber.page.ts`) before proceeding to step 2 - confirmed
+live 2026-09-29.
 
 1. Reach the Payment screen's Batch List tab (`payment-batch-list.md`).
 2. Click a batch row's **Transaction Add/Edit** icon (pencil glyph;
@@ -68,9 +75,9 @@ Invoice" (+) icon; not directly navigable.
 - Type into Quick Search and re-run Search — confirmed live: accepts input,
   Search re-runs without error. No specific result set asserted (production-
   looking environment, data changes over time).
-- Switch Based On from Acct Eff Date to Due Date (or Invoice Date), then
-  re-run Search — confirmed live: dropdown value changes, Search re-runs
-  without error.
+- Switch Based On from Acct Eff Date to Due Date, then to Invoice Date, then
+  re-run Search after each confirmed live 2026-09-29: dropdown value changes,
+  Search re-runs without error, for both options.
 - Open the Billing Method multiselect, use Select All (or an individual
   option's row), close the panel, then re-run Search — confirmed live: panel
   opens, selection changes reflect in the closed control's chips, Search

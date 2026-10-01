@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 import { BasePage } from '../../../framework/pages/BasePage';
 import { getRequiredEnv } from '../../../framework/utils/env';
 import { BatchTransactionDetailLocators } from './batchTransactionDetail.locators';
@@ -46,6 +46,16 @@ export class BatchTransactionDetailPage extends BasePage {
 
   async closeDetailPopup(): Promise<void> {
     await this.click(this.locators.modalCloseButton);
+  }
+
+  /** Scrolls the modal grid horizontally via a real wheel gesture -
+   * confirmed necessary live 2026-09-30: this popup only renders its
+   * first 5 columns until scrolled (ag-Grid column virtualization, same
+   * quirk as payment-batch-list.md's Edge Cases; setting `scrollLeft`
+   * directly via JS does not trigger it here either). */
+  async scrollModalGridHorizontally(deltaX: number): Promise<void> {
+    await this.locators.modalGridBody.hover();
+    await this.page.mouse.wheel(deltaX, 0);
   }
 
   // ---------------------------------------------------------------------

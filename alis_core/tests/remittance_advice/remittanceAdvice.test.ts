@@ -1,4 +1,4 @@
-import { test, expect } from '../../../framework/fixtures';
+﻿import { test, expect } from '../../../framework/fixtures';
 import { getCredential } from '../../../framework/utils/env';
 import { reportedStep } from '../../../framework/utils/reportStep';
 import { waitForVisible } from '../../../framework/utils/waits';
@@ -87,11 +87,32 @@ test(
         await remittanceAdvicePage.openRemittanceDownloadAsMenu();
 
         const download = await remittanceAdvicePage.downloadPdf();
-        expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
+        // Confirmed live 2026-09-30: filename is date-stamped, not
+        // batch/check-number-stamped as an earlier pass assumed.
+        expect(download.suggestedFilename()).toMatch(/^RemittanceAdvice_\d{8}\.pdf$/i);
         return download;
       },
       (download) => `Selected the first row, opened the Remittance Download As menu, and downloaded "${download.suggestedFilename()}" as a PDF.`,
       { label: 'Selected row checkbox', locator: remittanceAdvicePage.firstRowCheckboxLocator },
+    );
+
+    await reportedStep(
+      page,
+      testInfo,
+      'Download the Remittance Advice as Excel too',
+      async () => {
+        // Per the PDF checklist's "verify the Excel version matches the PDF
+        // version" scenario - confirms the Excel download itself succeeds
+        // with the same date-stamped filename pattern (as .xls, not .xlsx -
+        // confirmed live 2026-09-30). Full cell-by-cell content parity
+        // against the PDF is not automated in this pass (would need a new
+        // PDF/legacy-.xls parsing dependency - see remittance-advice.md).
+        await remittanceAdvicePage.openRemittanceDownloadAsMenu();
+        const download = await remittanceAdvicePage.downloadExcel();
+        expect(download.suggestedFilename()).toMatch(/^RemittanceAdvice_\d{8}\.xls$/i);
+        return download;
+      },
+      (download) => `Opened the Remittance Download As menu again and downloaded "${download.suggestedFilename()}" as Excel.`,
     );
   },
 );

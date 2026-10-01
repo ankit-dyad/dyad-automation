@@ -1,4 +1,4 @@
-# Remittance Advice (Remittance Download As)
+﻿# Remittance Advice (Remittance Download As)
 
 ## Overview
 
@@ -58,11 +58,19 @@ state-mutating one).
 
 ## Expected Outcomes
 
-Per the PDF (not independently re-verified against the downloaded file's
-actual rendered content in this pass — only the triggering mechanism was
-confirmed): the PDF shows the Dyad letterhead/address, "Remittance Advice"
-title, Bank Name, Payee, Check No., Date, and Amount; the Excel version
-mirrors the PDF's layout and values.
+- Confirmed live 2026-09-30: filenames are date-stamped, not batch/check-
+  number-stamped as an earlier pass assumed - `RemittanceAdvice_<YYYYMMDD>.pdf`
+  for PDF, `RemittanceAdvice_<YYYYMMDD>.xls` (legacy .xls, not .xlsx) for both
+  "Excel Data Only" and "Excel Format" (same filename for both options).
+- Confirmed live 2026-09-30 via `pypdf` text extraction on a real download:
+  the PDF shows "***** Remittance Advice *****" as its title, a "Printed On"
+  timestamp, Bank Name, Payee, Check No. ("TBD" observed - a placeholder,
+  not a bug), Date, Amount, and a policy detail row (Policy No., Insured
+  Name, Type, Acct Eff Dt). Matches the PDF checklist's expected content.
+  Cell-by-cell parity between the PDF and Excel version is not automated -
+  would need a new PDF-parsing (`pypdf` is available in this repo's Python
+  environment, used ad hoc during this exploration, but not wired into the
+  committed Playwright/TS suite) and legacy-.xls-parsing dependency.
 
 ## Edge Cases / Known Quirks
 
