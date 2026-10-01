@@ -1,0 +1,64 @@
+name: Nexsure Login (Chrome)
+
+# Runs nexsure/tests/login/login.test.ts against the "nexsure" Playwright
+# project (playwright.config.ts pins it to devices['Desktop Chrome']).
+#
+# Required repo secrets:
+#   NEXSURE_LOGIN_USER — Nexsure QA username
+#   NEXSURE_LOGIN_PASS — Nexsure QA password
+# (framework/utils/env.ts's getCredential() would otherwise fall back to
+# nexsure/knowledge/data.json's credentials — CI should always supply real
+# secrets instead of relying on that file fallback.)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'nexsure/tests/login/**'
+      - 'framework/**'
+      - 'nexsure/knowledge/pages/login.md'
+      - 'playwright.config.ts'
+      - '.github/workflows/nexsure-login-chrome.yml'
+  pull_request:
+    paths:
+      - 'nexsure/tests/login/**'
+      - 'framework/**'
+      - 'nexsure/knowledge/pages/login.md'
+      - 'playwright.config.ts'
+      - '.github/workflows/nexsure-login-chrome.yml'
+
+jobs:
+  login-chrome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium (Playwright)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Nexsure login test (Chrome)
+        env:
+          NEXSURE_LOGIN_USER: ${{ secrets.NEXSURE_LOGIN_USER }}
+          NEXSURE_LOGIN_PASS: ${{ secrets.NEXSURE_LOGIN_PASS }}
+        run: npx playwright test --project=nexsure nexsure/tests/login/login.test.ts
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexsure-login-chrome-report
+          path: reports/html
+          retention-days: 14

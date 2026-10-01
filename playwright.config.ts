@@ -1,6 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
+ * Element highlighter on/off flag — when true, BasePage's action helpers
+ * (click, enter, select, check, uncheck) draw a brief colored outline around
+ * the target element right before interacting with it, so screenshots,
+ * videos, and traces show exactly what was acted on. On by default; disable
+ * for a run with HIGHLIGHT_ELEMENTS=false (e.g. CI, or when the extra
+ * per-action DOM writes aren't wanted).
+ */
+export const HIGHLIGHT_ELEMENTS = process.env.HIGHLIGHT_ELEMENTS !== 'false';
+
+/**
  * Plain Playwright config — no AI calls happen from anything under a product's
  * tests/ folder. This must run standalone in CI with zero dependency on /agents.
  *
