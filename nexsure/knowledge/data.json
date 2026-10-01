@@ -1,5 +1,6 @@
 {
   "product": "nexsure",
+  "baseUrl": "https://jmiqaweb01.nexsure.com/nexui/",
   "status": "scaffold",
   "application": null,
   "environments": [
@@ -13,7 +14,6 @@
     }
   ],
   "activeBaseUrlEnvVar": "NEXSURE_BASE_URL",
-  "baseUrl": null,
   "framework": null,
   "appVersion": null,
   "appVersionDate": null,
@@ -92,5 +92,8 @@
     "name": "Automation Client fd9a29f5",
     "createdAt": "2026-09-25T11:54:24.088Z",
     "notes": "Populated automatically by createClient.test.ts (via framework/utils/dataStore.ts's saveProductData) after each run with the freshly created client's name — read this from other tests that need to act on the client just created, as opposed to existingClient's stable, unchanging fixture."
+  },
+  "editPolicy": {
+    "notes": "Populated automatically by policy_lifecycle.test.ts (via framework/utils/dataStore.ts's saveProductData) after each run with the freshly created policy's number — read this from other tests that need to act on the policy just created, as opposed to existingClient's stable, unchanging fixture."
   }
 }
