@@ -13,7 +13,9 @@ import nexsureData from '../../knowledge/data.json';
  * `credentials[0]` — intentionally ignores NEXSURE_LOGIN_USER/PASS env vars
  * (unlike getCredential(), which would prefer them if set) so this test
  * always runs against whatever's documented in data.json, not whatever a
- * shell/CI happens to have exported.
+ * shell/CI happens to have exported. Same reasoning for navigation: goes
+ * straight to data.json's `baseUrl` instead of LoginPage.goto() (which would
+ * resolve against playwright.config.ts's own baseURL/PLAYWRIGHT_BASE_URL).
  */
 test(
   'Nexsure: standard agent can log in with valid credentials',
@@ -26,7 +28,7 @@ test(
   async ({ page }) => {
     const loginPage = new LoginPage(page);
 
-    await loginPage.goto();
+    await page.goto(nexsureData.baseUrl);
     await expect(loginPage.signInButtonLocator).toBeVisible();
 
     await waitForVisible(loginPage.usernameFieldLocator);
