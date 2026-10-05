@@ -25,9 +25,11 @@ export async function loginAs(
   userEnvVar: string,
   passEnvVar: string,
 ): Promise<void> {
+  console.log(`[Auth] Logging in via ${loginPage.constructor.name} using environment variable "${userEnvVar}"...`);
   const username = getRequiredEnv(userEnvVar);
   const password = getRequiredEnv(passEnvVar);
 
   await loginPage.goto();
   await loginPage.login(username, password);
+  console.log(`[Auth] Completed login via ${loginPage.constructor.name}.`);
 }

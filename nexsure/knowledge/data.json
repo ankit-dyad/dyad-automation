@@ -1,19 +1,13 @@
 {
   "product": "nexsure",
-  "baseUrl": "https://jmiqaweb01.nexsure.com/nexui/",
   "status": "scaffold",
   "application": null,
   "environments": [
-    {
-      "name": "QA",
-      "baseUrlEnvVar": "NEXSURE_QA_BASE_URL"
-    },
-    {
-      "name": "Staging",
-      "baseUrlEnvVar": "NEXSURE_STAGING_BASE_URL"
-    }
+    { "name": "QA", "baseUrlEnvVar": "NEXSURE_QA_BASE_URL" },
+    { "name": "Staging", "baseUrlEnvVar": "NEXSURE_STAGING_BASE_URL" }
   ],
   "activeBaseUrlEnvVar": "NEXSURE_BASE_URL",
+  "baseUrl": null,
   "framework": null,
   "appVersion": null,
   "appVersionDate": null,
@@ -21,9 +15,7 @@
     {
       "role": "Standard agent",
       "usernameEnvVar": "NEXSURE_LOGIN_USER",
-      "passwordEnvVar": "NEXSURE_LOGIN_PASS",
-      "username": "dyad.automation.7772&0724",
-      "password": "!Dyad0001"
+      "passwordEnvVar": "NEXSURE_LOGIN_PASS"
     }
   ],
   "loginFlow": {
@@ -37,7 +29,13 @@
     ]
   },
   "primaryNavigation": [],
-  "createClient": {},
+  "createClient": {
+    "branch": "Automation Test Branch1",
+    "department": "Personal Lines AB1-3a/DB2-3 (2) 15days",
+    "personalLocationType": "Home Office",
+    "state": "California",
+    "notes": "Branch/department/location-type/state are real tenant configuration data, not per-run synthetic values — see nexsure/knowledge/pages/create-client.md's Edge Cases for why these specific options were picked."
+  },
   "openItems": [
     "No exploration run yet — run agents/explorer-agent.ts against a real Nexsure environment to populate this file."
   ],
@@ -50,50 +48,13 @@
     "state": "Colorado",
     "zip": "80461"
   },
-  "addContect": {
+    "addContect": {
     "lastName": "Automation"
   },
-  "assignment": {
-    "branch": "2.5 branch",
-    "department": "Allied Health",
-    "responsibility": "Account Executive",
-    "employee": "Automation, DyadQA2.5"
-  },
-  "policyLifecycle": {
-    "product": "X100_Commercial Lines",
-    "lineOfBusiness": "X100_General Liability (126)",
-    "issuingCarrier": "AAA Carrier",
-    "billingCarrier": "AAA Carrier",
-    "notes": "Product/LOB/Carrier are real tenant master data (see nexsure/knowledge/pages/opportunities_new.md and opportunuty_quote_info.md) — not per-run synthetic values."
-  },
-  "endorsement": {
-    "description": "Process endorsement.",
-    "notes": "Process endorsement."
-  },
-  "policyEdit": {
-    "description": "Policy edit transaction"
-  },
-  "renewal": {
-    "description": "Policy renewal"
-  },
-  "cancellation": {
-    "reason": "Insured Request",
-    "method": "Flat",
-    "status": "Appointment"
-  },
-  "rewrite": {
-    "primaryState": "Colorado"
-  },
-  "existingClient": {
-    "name": "automation_001",
-    "notes": "A pre-existing client record in the QA tenant, found via Find a Client's Keywords search rather than created fresh each run — used by the policy_lifecycle_existing_client test so repeat runs don't need a brand-new client every time."
-  },
-  "createdClient": {
-    "name": "Automation Client fd9a29f5",
-    "createdAt": "2026-09-25T11:54:24.088Z",
-    "notes": "Populated automatically by createClient.test.ts (via framework/utils/dataStore.ts's saveProductData) after each run with the freshly created client's name — read this from other tests that need to act on the client just created, as opposed to existingClient's stable, unchanging fixture."
-  },
-  "editPolicy": {
-    "notes": "Populated automatically by policy_lifecycle.test.ts (via framework/utils/dataStore.ts's saveProductData) after each run with the freshly created policy's number — read this from other tests that need to act on the policy just created, as opposed to existingClient's stable, unchanging fixture."
-  }
+    "assignment": {
+      "branch": "2.5 branch",
+      "department": "Allied Health",
+      "responsibility": "Account Executive",
+      "employee": "Automation, DyadQA2.5"
+    }
 }

@@ -44,15 +44,8 @@ export function getCredential(envVarName: string, product: string, field: 'usern
   const dataPath = join(knowledgeDir(product), 'data.json');
   if (existsSync(dataPath)) {
     const data = JSON.parse(readFileSync(dataPath, 'utf-8'));
-    const credentials = data?.credentials?.[0];
-
-    if (typeof credentials?.[field] === 'string' && credentials[field]) return credentials[field];
-
-    const envVarNameFromConfig = credentials?.[`${field}EnvVar`];
-    if (typeof envVarNameFromConfig === 'string' && envVarNameFromConfig) {
-      const configuredEnv = process.env[envVarNameFromConfig];
-      if (configuredEnv) return configuredEnv;
-    }
+    const value = data?.credentials?.[0]?.[field];
+    if (typeof value === 'string' && value) return value;
   }
 
   throw new Error(

@@ -95,7 +95,15 @@ export class AddEditRiskPage extends BasePage {
    * comments), so this method only waits for it to actually be visible
    * before typing. */
   async fillLimitsAndDeductibles(input: LimitsAndDeductiblesInput): Promise<void> {
-    await this.waitForVisible(this.locators.limitsAndDeductiblesHeading, 15000);
+    const heading = this.locators.limitsAndDeductiblesHeading;
+    const isHeadingVisible = await heading.isVisible().catch(() => false);
+    if (!isHeadingVisible) {
+      const coverageTab = this.locators.coverageTab('COMMERCIAL GENERAL LIABILITY');
+      if (await coverageTab.isVisible().catch(() => false)) {
+        await this.click(coverageTab);
+      }
+    }
+    await this.waitForVisible(this.locators.limitsAndDeductiblesHeading, 60000);
 
     await this.enter(this.locators.generalAggregateField, input.generalAggregate);
     await this.enter(this.locators.productsCompletedOperationsAggregateField, input.productsCompletedOperationsAggregate);

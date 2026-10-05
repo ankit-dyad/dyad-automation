@@ -76,6 +76,11 @@ export function createPolicyRef(
   };
 }
 
+/** Generates a random policy number like POL123456 */
+export function createRandomPolicyNumber(prefix = 'POL', digits = 4): string {
+  return `${prefix}${fakeDigits(digits)}`;
+}
+
 /** Generates a unique synthetic claim reference tied to a policy. */
 export function createClaimRef(policyNumber: string, overrides: Partial<ClaimRef> = {}): ClaimRef {
   return {

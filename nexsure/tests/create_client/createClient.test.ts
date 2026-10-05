@@ -1,6 +1,5 @@
 import { test, expect } from '../../../framework/fixtures';
 import { getCredential } from '../../../framework/utils/env';
-import { saveProductData } from '../../../framework/utils/dataStore';
 import nexsureData from '../../knowledge/data.json';
 import { LoginPage } from '../login/login.page';
 import { CreateClientPage } from './createClient.page';
@@ -11,9 +10,9 @@ import { CreateClientPage } from './createClient.page';
  * creation, and live-verified 2026-09-17 to persist a real client record in the
  * jmiqaweb01 QA tenant — the client name must be unique per run (from
  * testData.clientProfile()) or the search would find a stale match instead of
- * "No Results Found". Location Type/State come from nexsure/knowledge/data.json's
- * "newClient" section, Branch/Department from its "assignment" section — real
- * tenant configuration data, not per-run synthetic values.
+ * "No Results Found". Branch/Department/Location Type/State come from
+ * nexsure/knowledge/data.json's "createClient" section — real tenant
+ * configuration data, not per-run synthetic values.
  */
 test(
   'Nexsure: create a new client from the New Opportunity wizard',
@@ -24,7 +23,6 @@ test(
     ],
   },
   async ({ page, testData }) => {
-    test.setTimeout(90000); // multi-step wizard against a live QA tenant, plus BasePage's per-action 1s pre-waits
     const loginPage = new LoginPage(page);
     await loginPage.goto();
     await loginPage.login(
@@ -38,9 +36,7 @@ test(
     await expect(page).toHaveURL(/#\//);
 
     const client = testData.clientProfile();
-    const personalLocationType = nexsureData.newClient.locationType;
-    const state = nexsureData.newClient.state;
-    const { branch, department } = nexsureData.assignment;
+    const { branch, department, personalLocationType, state } = nexsureData.createClient;
 
     const createClientPage = new CreateClientPage(page);
 
@@ -86,11 +82,6 @@ test(
     await test.step('Confirm the client was created', async () => {
       await expect(createClientPage.clientSummaryLocator(client.clientName, 'Personal')).toBeVisible();
       console.log(`Client "${client.clientName}" created successfully.`);
-
-      saveProductData('nexsure', 'createdClient', {
-        name: client.clientName,
-        createdAt: new Date().toISOString(),
-      });
     });
   },
 );

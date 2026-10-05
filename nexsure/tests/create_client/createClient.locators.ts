@@ -128,14 +128,6 @@ export class CreateClientLocators {
     return this.page.locator(".form_group:has-text('Department') .vs__dropdown-toggle");
   }
 
-  get responsibilityToggle() {
-    return this.page.locator(".form_group:has-text('Responsibility') .vs__dropdown-toggle");
-  }
-
-  get employeeToggle() {
-    return this.page.locator(".form_group:has-text('Employee') .vs__dropdown-toggle");
-  }
-
   get doneButton() {
     return this.page.getByRole('button', { name: 'Done', exact: true });
   }
