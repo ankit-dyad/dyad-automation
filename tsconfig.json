@@ -3,7 +3,7 @@
     "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["ES2022"],
+    "lib": ["ES2022", "DOM"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,5 +13,12 @@
     "noUnusedParameters": false,
     "types": ["node"]
   },
-  "include": ["agents/**/*.ts", "framework/**/*.ts", "tests/**/*.ts", "playwright.config.ts"]
+  "include": [
+    "agents/**/*.ts",
+    "framework/**/*.ts",
+    "tests/**/*.ts",
+    "alis/**/*.ts",
+    "nexsure/**/*.ts",
+    "playwright.config.ts"
+  ]
 }

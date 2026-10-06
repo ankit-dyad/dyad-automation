@@ -81,6 +81,7 @@
   "shouldBePresent": {
     "count": 28,
     "forms": [
+      { "formNo": "L343", "formName": "Exclusion - Unmanned Aircraft, Other Than Unmanned Aircraft, Auto or Watercraft (Limited)" },
       { "formNo": "L367", "formName": "Exclusion - Trampolines" },
       { "formNo": "L369", "formName": "Exclusion - Communicable or Infectious Disease" },
       { "formNo": "L378", "formName": "Exclusion - Swimming Pools" },

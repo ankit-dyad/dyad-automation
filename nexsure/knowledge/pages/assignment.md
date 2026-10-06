@@ -5,7 +5,7 @@
 **URL pattern:** `https://jmiqaweb01.nexsure.com/nexui/#/client/new/opportunity?ClientName=<Name>`
 **Captured on:** 2026-09-17
 
-Companion document to `client_contects.md` (Step 2 of the same wizard). Same purpose: a structural/behavioral reference for automation, no script code included.
+Companion document to `Add_Contact_Knowledge_Base.md` (Step 2 of the same wizard). Same purpose: a structural/behavioral reference for automation, no script code included.
 
 ---
 

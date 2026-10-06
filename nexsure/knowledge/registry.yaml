@@ -19,24 +19,3 @@
   journeys: [login, create-client]
   last_verified: 2026-09-17
   app_version: null
-- page: header
-  file: pages/header.md
-  journeys: [login, create-client, navigate-opportunities]
-  last_verified: 2026-09-17
-  app_version: null
-- page: opportunities
-  file: pages/opportunities.md
-  journeys: [navigate-opportunities, create-client]
-  last_verified: 2026-09-17
-  app_version: null
-- page: client_record_policies
-  file: pages/client_record/client_record_policies.md
-  journeys: [full-policy-lifecycle]
-  last_verified: 2026-09-21
-  app_version: null
-- page: policy_create_endorsement
-  file: pages/client_record/policy_create_endorsement_knowledge_base.md
-  journeys: [full-policy-lifecycle]
-  last_verified: 2026-09-21
-  app_version: null
-

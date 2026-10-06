@@ -1,7 +1,7 @@
 import { test, expect } from '../../../framework/fixtures';
+import { getCredential } from '../../../framework/utils/env';
 import { waitForVisible } from '../../../framework/utils/waits';
 import { LoginPage } from './login.page';
-import nexsureData from '../../knowledge/data.json';
 
 /**
  * From /nexsure/scenarios/nexsure_sc_login.md. See nexsure/knowledge/pages/
@@ -35,8 +35,10 @@ test(
 
     await waitForVisible(loginPage.usernameFieldLocator);
 
-    const { username, password } = nexsureData.credentials[0];
-    await loginPage.login(username, password);
+    await loginPage.login(
+      getCredential('NEXSURE_LOGIN_USER', 'nexsure', 'username'),
+      getCredential('NEXSURE_LOGIN_PASS', 'nexsure', 'password'),
+    );
 
     await test.step('Confirm the dashboard loaded', async () => {
       await expect(page).toHaveURL(/#\//);

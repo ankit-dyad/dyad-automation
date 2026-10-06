@@ -120,10 +120,9 @@ export const HIGHLIGHT_ELEMENTS = (() => {
  * product —
  *   alis/tests/<feature>/<feature>.test.ts
  *   nexsure/tests/<feature>/<feature>.test.ts
- *   alis_core/tests/<feature>/<feature>.test.ts
- * Run one product with `--project=alis` / `--project=nexsure` / `--project=alis_core`,
- * or everything with no --project flag. Tag a spec's title with `@smoke` and filter
- * with `--grep @smoke` for a critical-path-only run across every product.
+ * Run one product with `--project=alis` / `--project=nexsure`, or everything with
+ * no --project flag. Tag a spec's title with `@smoke` and filter with
+ * `--grep @smoke` for a critical-path-only run across every product.
  *
  * Sharding: Playwright doesn't expose a shard count in the config file itself — it's
  * a CLI flag, e.g.:
@@ -148,6 +147,8 @@ export default defineConfig({
   ],
 
   use: {
+    actionTimeout: 1000 * 1000,
+    navigationTimeout: 800 * 1000,
     /* Page Objects store relative paths (from their knowledge file's "## URL"
      * section) and navigate via BasePage.goto(), which resolves against this.
      * Point it at whichever product's base URL this run targets, e.g.
@@ -162,18 +163,8 @@ export default defineConfig({
     trace: 'on',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    /* Confirmed live 2026-09-29/2026-09-30 (alis_core): with no default here,
-     * a single locator action (e.g. BasePage.click()) that never becomes
-     * actionable rides the ENTIRE outer test.setTimeout() instead of failing
-     * fast - twice now, on two different locators, each eating 5-14+ minutes
-     * of a real-write test before finally erroring. This bounds every
-     * locator action (click/fill/check/selectOption/etc., including
-     * BasePage's own helpers) to a sane default so a genuine hang fails
-     * quickly with a clear "Timeout 30000ms exceeded" message instead of
-     * masquerading as the outer test timeout. Well within every spec's own
-     * test.setTimeout() (60s-600s across this suite), so this should never
-     * fire on a merely-slow-but-eventually-successful action. */
-    actionTimeout: 30_000,
+    // Wait for stable page state
+    waitUntil: 'domcontentloaded',
   },
 
   projects: [

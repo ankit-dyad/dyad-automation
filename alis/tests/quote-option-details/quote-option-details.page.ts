@@ -178,7 +178,7 @@ export class QuoteOptionDetailPage extends BasePage {
 
     const isAlreadyChecked = await checkbox.isChecked().catch(() => false);
     if (!isAlreadyChecked) {
-      await checkbox.click({ force: true }).catch(async () => {
+      await this.click(checkbox, { force: true }).catch(async () => {
         await this.page.waitForTimeout(1000);
         await this.check(checkbox);
       });
@@ -186,7 +186,7 @@ export class QuoteOptionDetailPage extends BasePage {
 
     const isChecked = await checkbox.isChecked().catch(() => false);
     if (!isChecked) {
-      await row.locator('input[type="checkbox"], .ag-checkbox-input').click({ force: true }).catch(() => { });
+      await this.click(row.locator('input[type="checkbox"], .ag-checkbox-input'), { force: true }).catch(() => { });
     }
   }
 
@@ -306,31 +306,110 @@ export class QuoteOptionDetailPage extends BasePage {
   }
 
   async clickContinueOnReviewPolicy(reviewPage: Page): Promise<void> {
-    await reviewPage.getByRole('button', { name: 'Continue' }).click();
+    const continueBtn = reviewPage.getByRole('button', { name: 'Continue' });
+    console.log(`Clicking on locator: ${continueBtn}`);
+    await continueBtn.click();
+    console.log(`Successfully clicked on locator: ${continueBtn}`);
   }
 
   async fillMissingValues(reviewPage: Page, mepDollar: string, mepPercentage: string): Promise<void> {
     const dollarInput = reviewPage.locator('#tcPolicyMissingValues_tpMissingValues_xxMEPInDolWSign');
     const percentInput = reviewPage.locator('#tcPolicyMissingValues_tpMissingValues_xxMEPInPerWSign');
 
+    console.log(`Waiting for locator to be visible: ${dollarInput}`);
+    await dollarInput.waitFor({ state: 'visible', timeout: 15000 });
+    console.log(`Clicking on locator: ${dollarInput}`);
     await dollarInput.click();
-    
+    console.log(`Entering "${mepDollar}" into locator: ${dollarInput}`);
     await dollarInput.fill(mepDollar);
+    console.log(`Clicking on locator: ${percentInput}`);
     await percentInput.click();
+    console.log(`Entering "${mepPercentage}" into locator: ${percentInput}`);
     await percentInput.fill(mepPercentage);
   }
 
   async openRecipientCopyPdf(reviewPage: Page, recipientName = 'Insured'): Promise<Page> {
+    const link = reviewPage.getByRole('link', { name: recipientName });
+    console.log(`Waiting for locator to be visible: ${link}`);
+    await link.waitFor({ state: 'visible', timeout: 15000 });
     const page2Promise = reviewPage.waitForEvent('popup');
-    await reviewPage.getByRole('link', { name: recipientName }).click();
+    console.log(`Clicking on locator: ${link}`);
+    await link.click();
     const page2 = await page2Promise;
+    await page2.waitForLoadState('domcontentloaded');
     return page2;
   }
 
   async jumpToPdfPage(pdfPage: Page, pageNumber: string): Promise<void> {
-    const pageNumberInput = pdfPage.locator('iframe[name]').contentFrame().getByRole('textbox', { name: 'Page number' });
+    await pdfPage.waitForLoadState('domcontentloaded');
+
+    // In Chromium, Chrome's built-in PDF viewer runs inside an extension frame
+    // (chrome-extension://.../index.html), not an HTML iframe[name].
+    let pdfFrame: import('@playwright/test').Frame | null = null;
+    const startTime = Date.now();
+    const timeoutMs = 20000;
+
+    while (Date.now() - startTime < timeoutMs) {
+      pdfFrame = pdfPage.frames().find((f) => f.url().includes('chrome-extension')) ?? null;
+      if (pdfFrame) {
+        const input = pdfFrame.locator('#pageSelector, input[aria-label="Page number"]');
+        if (await input.isVisible().catch(() => false)) {
+          break;
+        }
+      }
+      const fallbackInput = pdfPage.locator('iframe[name]').contentFrame().locator('#pageSelector, input[aria-label="Page number"]');
+      if (await fallbackInput.isVisible().catch(() => false)) {
+        break;
+      }
+      await pdfPage.waitForTimeout(200);
+    }
+
+    let pageNumberInput: import('@playwright/test').Locator;
+    if (pdfFrame) {
+      pageNumberInput = pdfFrame
+        .getByRole('textbox', { name: 'Page number' })
+        .or(pdfFrame.locator('#pageSelector'))
+        .or(pdfFrame.locator('input[aria-label="Page number"]'))
+        .first();
+    } else {
+      pageNumberInput = pdfPage
+        .locator('iframe[name]')
+        .contentFrame()
+        .getByRole('textbox', { name: 'Page number' })
+        .or(pdfPage.getByRole('textbox', { name: 'Page number' }))
+        .or(pdfPage.locator('#pageSelector'))
+        .first();
+    }
+
+    console.log(`Waiting for locator to be visible: ${pageNumberInput}`);
+    await pageNumberInput.waitFor({ state: 'visible', timeout: 15000 });
+    console.log(`Clicking on locator: ${pageNumberInput}`);
     await pageNumberInput.click();
+    console.log(`Entering "${pageNumber}" into locator: ${pageNumberInput}`);
     await pageNumberInput.fill(pageNumber);
+    console.log(`Pressing Enter on locator: ${pageNumberInput}`);
     await pageNumberInput.press('Enter');
+    await pdfPage.waitForTimeout(2000);
+  }
+
+  async getPdfCurrentPageNumber(pdfPage: Page): Promise<string> {
+    const pdfFrame = pdfPage.frames().find((f) => f.url().includes('chrome-extension'));
+    let input: import('@playwright/test').Locator;
+    if (pdfFrame) {
+      input = pdfFrame
+        .getByRole('textbox', { name: 'Page number' })
+        .or(pdfFrame.locator('#pageSelector'))
+        .or(pdfFrame.locator('input[aria-label="Page number"]'))
+        .first();
+    } else {
+      input = pdfPage
+        .locator('iframe[name]')
+        .contentFrame()
+        .getByRole('textbox', { name: 'Page number' })
+        .or(pdfPage.getByRole('textbox', { name: 'Page number' }))
+        .or(pdfPage.locator('#pageSelector'))
+        .first();
+    }
+    return (await input.inputValue().catch(() => '')).trim();
   }
 }

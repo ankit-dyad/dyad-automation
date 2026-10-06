@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { waitForVisible } from '../utils/waits';
-import { HIGHLIGHT_ELEMENTS } from '../../playwright.config';
+import { highlightElement, unhighlightElement } from '../utils/screenshot';
 
 /**
  * Common base for every product's Page Objects (Alis, Nexsure, and any product
@@ -24,13 +24,35 @@ export abstract class BasePage {
    * rely on this default goto(), or override it entirely. */
   protected path?: string;
 
-  async goto(): Promise<void> {
-    if (!this.path) {
+  async goto(targetUrl?: string): Promise<void> {
+    const destination = targetUrl ?? this.path;
+    if (!destination) {
       throw new Error(
         `${this.constructor.name} has no "path" set and does not override goto().`,
       );
     }
-    await this.page.goto(this.path);
+    console.log(`[Navigation] Navigating to: ${destination}`);
+    await this.page.goto(destination);
+    console.log(`[Success] Navigated to: ${destination}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Element Highlighter helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Highlights a locator in the DOM with a colored outline and glow effect
+   * so it is clearly visible during execution and in captured screenshots.
+   */
+  async highlight(locator: Locator, color = '#000000ff'): Promise<void> {
+    await highlightElement(locator, color);
+  }
+
+  /**
+   * Clears highlight outline from a locator.
+   */
+  async unhighlight(locator: Locator): Promise<void> {
+    await unhighlightElement(locator);
   }
 
   // ---------------------------------------------------------------------------
@@ -39,82 +61,100 @@ export abstract class BasePage {
   // behavior stays consistent in one place.
   // ---------------------------------------------------------------------------
 
-  private static readonly HIGHLIGHT_MARKER_ATTR = 'data-basepage-highlight';
-
-  /** Draws a colored outline box over the element's current position, gated
-   * by the HIGHLIGHT_ELEMENTS flag in playwright.config.ts. Best-effort only
-   * (`.catch(() => {})`) — a highlight failing (e.g. element detached by the
-   * time it runs) must never fail the action it's decorating. Clears any
-   * previous marker first so boxes don't stack up across actions. */
-  private async highlightElement(locator: Locator): Promise<void> {
-    if (!HIGHLIGHT_ELEMENTS) return;
-    await locator
-      .evaluate((el, attr) => {
-        const doc = el.ownerDocument;
-        doc.querySelectorAll(`[${attr}]`).forEach((node) => node.remove());
-        const rect = el.getBoundingClientRect();
-        const box = doc.createElement('div');
-        box.setAttribute(attr, 'true');
-        Object.assign(box.style, {
-          position: 'fixed',
-          left: `${rect.left}px`,
-          top: `${rect.top}px`,
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
-          border: '3px solid #ff3366',
-          boxShadow: '0 0 0 2px rgba(255, 51, 102, 0.35)',
-          zIndex: '2147483647',
-          pointerEvents: 'none',
-          boxSizing: 'border-box',
-        });
-        doc.body.appendChild(box);
-      }, BasePage.HIGHLIGHT_MARKER_ATTR)
-      .catch(() => {});
+  /** Clicks an element. */
+  protected async click(locator: Locator, options?: Parameters<Locator['click']>[0]): Promise<void> {
+    console.log(`Clicking on locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.click(options);
+    console.log(`Successfully clicked on locator: ${locator}`);
   }
 
-  /** Clicks an element with 1s pre-wait. */
-  protected async click(locator: Locator): Promise<void> {
-    await this.highlightElement(locator);
-    await this.page.waitForTimeout(1000);
-    await locator.click();
+  /** Clears and types text into a field. */
+  protected async enter(locator: Locator, value: string, options?: Parameters<Locator['fill']>[1]): Promise<void> {
+    console.log(`Entering "${value}" into locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.fill(value, options);
+    console.log(`Successfully entered "${value}" into locator: ${locator}`);
   }
 
-  /** Clears and types text into a field with 1s pre-wait. */
-  protected async enter(locator: Locator, value: string): Promise<void> {
-    await this.highlightElement(locator);
-    await this.page.waitForTimeout(1000);
-    await locator.fill(value);
+  /** Picks an option from a `<select>` (or Playwright-compatible listbox). */
+  protected async select(locator: Locator, value: string, options?: Parameters<Locator['selectOption']>[1]): Promise<void> {
+    console.log(`Selecting option "${value}" in locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.selectOption(value, options);
+    console.log(`Successfully selected option "${value}" in locator: ${locator}`);
   }
 
-  /** Picks an option from a `<select>` with 1s pre-wait. */
-  protected async select(locator: Locator, value: string): Promise<void> {
-    await this.highlightElement(locator);
-    await this.page.waitForTimeout(1000);
-    await locator.selectOption(value);
+  /** Ticks a checkbox/radio. */
+  protected async check(locator: Locator, options?: Parameters<Locator['check']>[0]): Promise<void> {
+    console.log(`Checking locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.check(options);
+    console.log(`Successfully checked locator: ${locator}`);
   }
 
-  /** Ticks a checkbox/radio with 1s pre-wait. */
-  protected async check(locator: Locator): Promise<void> {
-    await this.highlightElement(locator);
-    await this.page.waitForTimeout(1000);
-    await locator.check();
-  }
-
-  /** Unticks a checkbox with 1s pre-wait. */
-  protected async uncheck(locator: Locator): Promise<void> {
-    await this.highlightElement(locator);
-    await this.page.waitForTimeout(1000);
-    await locator.uncheck();
+  /** Unticks a checkbox. */
+  protected async uncheck(locator: Locator, options?: Parameters<Locator['uncheck']>[0]): Promise<void> {
+    console.log(`Unchecking locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.uncheck(options);
+    console.log(`Successfully unchecked locator: ${locator}`);
   }
 
   /** Reads an element's visible text. */
   protected async textOf(locator: Locator): Promise<string> {
-    return (await locator.textContent())?.trim() ?? '';
+    console.log(`Reading text of locator: ${locator}`);
+    const text = (await locator.textContent())?.trim() ?? '';
+    console.log(`Read text "${text}" from locator: ${locator}`);
+    return text;
   }
 
   /** State getter — whether an element is currently visible. */
   protected async isVisible(locator: Locator): Promise<boolean> {
-    return locator.isVisible();
+    console.log(`Checking visibility of locator: ${locator}`);
+    const visible = await locator.isVisible();
+    console.log(`Locator is ${visible ? 'visible' : 'not visible'}: ${locator}`);
+    return visible;
+  }
+
+  /** State getter — whether a checkbox/radio is checked. */
+  protected async isChecked(locator: Locator): Promise<boolean> {
+    console.log(`Checking if locator is checked: ${locator}`);
+    const checked = await locator.isChecked();
+    console.log(`Locator is ${checked ? 'checked' : 'not checked'}: ${locator}`);
+    return checked;
+  }
+
+  /** State getter — whether an element is enabled. */
+  protected async isEnabled(locator: Locator): Promise<boolean> {
+    console.log(`Checking if locator is enabled: ${locator}`);
+    const enabled = await locator.isEnabled();
+    console.log(`Locator is ${enabled ? 'enabled' : 'disabled'}: ${locator}`);
+    return enabled;
+  }
+
+  /** Reads an input field's current value. */
+  protected async inputValue(locator: Locator): Promise<string> {
+    console.log(`Reading input value of locator: ${locator}`);
+    const val = await locator.inputValue();
+    console.log(`Read input value "${val}" from locator: ${locator}`);
+    return val;
+  }
+
+  /** Hovers over an element. */
+  protected async hover(locator: Locator, options?: Parameters<Locator['hover']>[0]): Promise<void> {
+    console.log(`Hovering over locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.hover(options);
+    console.log(`Successfully hovered over locator: ${locator}`);
+  }
+
+  /** Presses a key on an element. */
+  protected async press(locator: Locator, key: string, options?: Parameters<Locator['press']>[1]): Promise<void> {
+    console.log(`Pressing key "${key}" on locator: ${locator}`);
+    await this.highlight(locator);
+    await locator.press(key, options);
+    console.log(`Successfully pressed key "${key}" on locator: ${locator}`);
   }
 
   /** Waits for an element to become visible (default 10s, overridable) — for a
@@ -123,6 +163,8 @@ export abstract class BasePage {
    * framework/utils/waits.ts's `waitForVisible`, exposed here so Page Object
    * subclasses don't need a separate import for it. */
   protected async waitForVisible(locator: Locator, timeoutMs?: number): Promise<void> {
+    console.log(`Waiting for locator to be visible: ${locator}`);
     await waitForVisible(locator, timeoutMs);
+    console.log(`Locator is visible: ${locator}`);
   }
 }

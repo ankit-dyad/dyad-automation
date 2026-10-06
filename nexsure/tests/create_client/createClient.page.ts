@@ -123,17 +123,6 @@ export class CreateClientPage extends BasePage {
     await this.selectDropdownOption(this.locators.departmentToggle, department);
   }
 
-  /** Always enabled, independent of Branch/Department (see assignment.md §2). */
-  async selectResponsibility(responsibility: string): Promise<void> {
-    await this.selectDropdownOption(this.locators.responsibilityToggle, responsibility);
-  }
-
-  /** Disabled until Branch and Department are both selected (see
-   * assignment.md §2) — call after selectBranch()/selectDepartment(). */
-  async selectEmployee(employee: string): Promise<void> {
-    await this.selectDropdownOption(this.locators.employeeToggle, employee);
-  }
-
   async clickDone(): Promise<void> {
     await this.click(this.locators.doneButton);
   }
