@@ -1,0 +1,9 @@
+baseURL: 'https://customer-alis.dyadtech.com/ALIS.BMS/APP/#/login'
+browser: 'chrome' # 'chrome'|'chromium'|'firefox'|'webkit'
+headless: false
+parallel: 4 # workers
+retries: 0
+screenshot: 'on'
+video: 'on' # 'on', 'off', 'retain-on-failure', 'on-first-retry'
+Artifacts: 'on' # 'on', 'off'
+elementHighlight: true
