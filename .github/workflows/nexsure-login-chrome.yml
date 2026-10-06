@@ -46,8 +46,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium (Playwright)
-        run: npx playwright install --with-deps chromium
+      - name: Install Chrome (Playwright)
+        # config.nexsure.yaml sets browser: 'chrome', which launches via
+        # channel: 'chrome' (the real installed Google Chrome) — needs the
+        # 'chrome' channel installed here, not the bundled 'chromium' binary.
+        run: npx playwright install --with-deps chrome
 
       - name: Run Nexsure login test (Chrome)
         env:
@@ -57,8 +60,33 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
+        id: upload_report
         uses: actions/upload-artifact@v4
         with:
           name: nexsure-login-chrome-report
           path: reports/html
           retention-days: 14
+
+      - name: Write run summary
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload_report.outputs.artifact-id }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const lines = ['## Nexsure Login (Chrome) — Playwright report'];
+            try {
+              const data = JSON.parse(fs.readFileSync('reports/results.json', 'utf-8'));
+              const s = data.stats || {};
+              const passed = s.expected ?? 0;
+              const failed = (s.unexpected ?? 0) + (s.flaky ?? 0);
+              const skipped = s.skipped ?? 0;
+              const seconds = Math.round((s.duration ?? 0) / 1000);
+              const icon = failed > 0 ? '❌' : '✅';
+              lines.push('', icon + ' **' + passed + ' passed**, **' + failed + ' failed**, **' + skipped + ' skipped** — ' + seconds + 's');
+            } catch (e) {
+              lines.push('', '⚠️ Could not read reports/results.json: ' + e.message);
+            }
+            lines.push('', '📄 Full HTML report: ' + process.env.ARTIFACT_URL);
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n');
+          "

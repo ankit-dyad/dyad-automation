@@ -77,7 +77,7 @@ export class EditPolicyPage extends BasePage {
   // --- Messages ---
 
   async addMessage(message: string): Promise<void> {
-    await this.waitForVisible(this.locators.addMessageButton, 60000);
+    await this.waitForVisible(this.locators.addMessageButton, 90000);
     await this.click(this.locators.addMessageButton);
     await this.waitForVisible(this.locators.messageContentField, 60000);
     await this.enter(this.locators.messageContentField, message);

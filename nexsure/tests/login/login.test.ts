@@ -8,6 +8,16 @@ import { LoginPage } from './login.page';
  * login.md: document.title stays "Nexsure" on both the sign-in and dashboard
  * screens, so the URL hash and the greeting heading are the reliable "logged in"
  * signals, not the title or a navigation event.
+ *
+ * Reads credentials directly from nexsure/knowledge/data.json's
+ * `credentials[0]` — intentionally ignores NEXSURE_LOGIN_USER/PASS env vars
+ * (unlike getCredential(), which would prefer them if set) so this test
+ * always runs against whatever's documented in data.json, not whatever a
+ * shell/CI happens to have exported. Navigation goes through LoginPage.goto()
+ * (BasePage's relative-path goto, path '.'), which resolves against
+ * playwright.config.ts's per-project baseURL — sourced from
+ * config.nexsure.yaml's `baseURL` for the "nexsure" project, the single
+ * source of truth for this environment's URL.
  */
 test(
   'Nexsure: standard agent can log in with valid credentials',
