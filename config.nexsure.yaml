@@ -1,6 +1,6 @@
 baseURL: 'https://jmiqaweb01.nexsure.com/nexui/'
 browser: 'chrome' # 'chrome'|'chromium'|'firefox'|'webkit'
-headless: false
+headless: true
 parallel: 4 # workers
 retries: 0
 screenshot: 'on'

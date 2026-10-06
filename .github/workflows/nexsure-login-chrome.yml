@@ -46,8 +46,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium (Playwright)
-        run: npx playwright install --with-deps chromium
+      - name: Install Chrome (Playwright)
+        # config.nexsure.yaml sets browser: 'chrome', which launches via
+        # channel: 'chrome' (the real installed Google Chrome) — needs the
+        # 'chrome' channel installed here, not the bundled 'chromium' binary.
+        run: npx playwright install --with-deps chrome
 
       - name: Run Nexsure login test (Chrome)
         env:
